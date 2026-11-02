@@ -7,6 +7,7 @@
 package com.kitsumed.shizucallrecorder.ui.screens
 
 import android.text.format.DateFormat
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.horizontalScroll
@@ -39,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitsumed.shizucallrecorder.R
 import com.kitsumed.shizucallrecorder.data.call.CallDirection
 import com.kitsumed.shizucallrecorder.data.recording.RecordingHistoryEntry
+import com.kitsumed.shizucallrecorder.system.recordingShareIntent
 import com.kitsumed.shizucallrecorder.ui.viewmodels.RecordingHistoryViewModel
 import com.kitsumed.shizucallrecorder.ui.viewmodels.RecordingHistoryState
 import com.kitsumed.shizucallrecorder.ui.viewmodels.RecordingPlaybackState
@@ -49,6 +51,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Date
+import kotlinx.coroutines.launch
 
 /** Recents is the home destination; the existing settings screen remains one tap away. */
 @Composable
@@ -89,11 +92,26 @@ private fun RecordingHistoryScreen(
 ) {
     val state by viewModel.history.collectAsStateWithLifecycle()
     val playback by viewModel.playback.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.stopPlayback() }
     DisposableEffect(viewModel) { onDispose { viewModel.stopPlayback() } }
 
-    RecordingHistoryContent(state, playback, onOpenSettings, viewModel::refresh, viewModel::toggle, viewModel::seek)
+    RecordingHistoryContent(
+        state, playback, onOpenSettings, viewModel::refresh, viewModel::toggle, viewModel::seek,
+        onShare = { entry ->
+            try {
+                val mimeType = context.contentResolver.getType(entry.uri)
+                val intent = recordingShareIntent(entry.uri, mimeType, entry.fileName)
+                context.startActivity(Intent.createChooser(intent, context.getString(R.string.general_share)))
+            } catch (_: Exception) {
+                scope.launch { snackbar.showSnackbar(context.getString(R.string.history_share_failed)) }
+            }
+        },
+        snackbarHostState = snackbar
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -104,7 +122,9 @@ internal fun RecordingHistoryContent(
     onOpenSettings: () -> Unit,
     onRefresh: () -> Unit,
     onToggle: (RecordingHistoryEntry) -> Unit,
-    onSeek: (Int) -> Unit
+    onSeek: (Int) -> Unit,
+    onShare: (RecordingHistoryEntry) -> Unit,
+    snackbarHostState: SnackbarHostState? = null
 ) {
     val uriHandler = LocalUriHandler.current
     var query by rememberSaveable { mutableStateOf("") }
@@ -125,6 +145,7 @@ internal fun RecordingHistoryContent(
     }
     CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(textDirection = TextDirection.ContentOrLtr)) {
         Scaffold(
+            snackbarHost = { snackbarHostState?.let { SnackbarHost(it) } },
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(R.string.history_title)) },
@@ -203,7 +224,7 @@ internal fun RecordingHistoryContent(
                                 )
                             }
                             items(calls, key = { it.uri.toString() }) { entry ->
-                                RecordingHistoryRow(entry, playback, { onToggle(entry) }, onSeek)
+                                RecordingHistoryRow(entry, playback, { onToggle(entry) }, onSeek, { onShare(entry) })
                                 HorizontalDivider(Modifier.padding(horizontal = 16.dp))
                             }
                         }
@@ -232,7 +253,8 @@ private fun RecordingHistoryRow(
     entry: RecordingHistoryEntry,
     playback: RecordingPlaybackState,
     onToggle: () -> Unit,
-    onSeek: (Int) -> Unit
+    onSeek: (Int) -> Unit,
+    onShare: () -> Unit
 ) {
     val selected = playback.uri == entry.uri
     val title = entry.callerName?.takeIf { it.isNotBlank() }
@@ -273,6 +295,13 @@ private fun RecordingHistoryRow(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
+            }
+            IconButton(onClick = onShare) {
+                Icon(
+                    Icons.Default.Share,
+                    stringResource(R.string.history_share, title),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
         if (selected && playback.failed) {

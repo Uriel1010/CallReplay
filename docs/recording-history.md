@@ -11,6 +11,8 @@ The original license and attribution remain in place. This feature was implement
 2. Open Recents to browse recordings, newest first, grouped by day.
 3. Search by caller name, phone number, or filename. Filter incoming or outgoing recordings.
 4. Tap play to listen in the app. Pause or seek using the controls beneath the selected call.
+   Use the share button beside a recording to open Android's share menu with the audio attached.
+   The chosen recipient receives temporary read access to that recording.
 5. Refresh after adding or deleting files outside the app. Recents also refreshes on resume.
 
 Recents displays recorded calls from the selected folder, including nested folders. It does not

@@ -354,5 +354,7 @@
     <string name="history_play_failed">Unable to play this recording. The file may be unavailable or its format unsupported. Tap play to retry.</string>
     <string name="history_progress">%1$s / %2$s</string>
     <string name="history_seek">Recording position</string>
+    <string name="history_share">Share recording of %1$s</string>
+    <string name="history_share_failed">Unable to share this recording. Check that the file is still available and try again.</string>
     <string name="history_fork_attribution">Independent fork of ShizuCallRecorder · View original</string>
 </resources>

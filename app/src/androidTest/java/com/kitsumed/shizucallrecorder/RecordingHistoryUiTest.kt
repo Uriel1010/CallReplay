@@ -90,6 +90,15 @@ class RecordingHistoryUiTest {
     }
 
     @Test
+    fun shareButtonTargetsTheCorrectRecording() {
+        var selected: Uri? = null
+        show(onShare = { selected = it.uri })
+        compose.onNodeWithContentDescription(compose.activity.getString(R.string.history_share, "Alice Test"))
+            .performClick()
+        compose.runOnIdle { assertEquals(entries.first().uri, selected) }
+    }
+
+    @Test
     fun landscapeWithLargeTextKeepsSearchAndPlaybackReachable() {
         compose.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         compose.waitUntil(5000) {
@@ -100,6 +109,8 @@ class RecordingHistoryUiTest {
         compose.onNodeWithTag("recording-history-list").performScrollToNode(hasText("Alice Test"))
         compose.onNodeWithText("Alice Test").assertIsDisplayed()
         compose.onNodeWithContentDescription(compose.activity.getString(R.string.history_play, "Alice Test"))
+            .assertIsDisplayed()
+        compose.onNodeWithContentDescription(compose.activity.getString(R.string.history_share, "Alice Test"))
             .assertIsDisplayed()
     }
 
@@ -132,6 +143,7 @@ class RecordingHistoryUiTest {
         fontScale: Float = 1f,
         forceRtl: Boolean = false,
         onToggle: (RecordingHistoryEntry) -> Unit = {},
+        onShare: (RecordingHistoryEntry) -> Unit = {},
         onSettings: () -> Unit = {}
     ) {
         compose.setContent {
@@ -142,7 +154,7 @@ class RecordingHistoryUiTest {
                     LocalDensity provides Density(density.density, fontScale),
                     LocalLayoutDirection provides direction
                 ) {
-                    RecordingHistoryContent(state, RecordingPlaybackState(), onSettings, {}, onToggle, {})
+                    RecordingHistoryContent(state, RecordingPlaybackState(), onSettings, {}, onToggle, {}, onShare)
                 }
             }
         }
