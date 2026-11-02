@@ -15,7 +15,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
+import androidx.core.graphics.drawable.toBitmap
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
 import com.kitsumed.shizucallrecorder.R
 import java.util.concurrent.TimeUnit
@@ -55,7 +56,7 @@ object SponsorNotificationHelper {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID_REMINDER)
             .setSmallIcon(R.drawable.ic_outline_heart_smile)
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            .setLargeIcon(AppCompatResources.getDrawable(context, R.drawable.ic_callreplay)?.toBitmap(128, 128))
             .setContentTitle(context.getString(R.string.sponsor_notification_call_to_action_title))
             .setContentText(context.getString(R.string.sponsor_notification_call_to_action))
             .setStyle(NotificationCompat.BigTextStyle()

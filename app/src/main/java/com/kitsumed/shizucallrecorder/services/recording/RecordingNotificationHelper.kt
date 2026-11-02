@@ -15,7 +15,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
+import androidx.core.graphics.drawable.toBitmap
+import androidx.appcompat.content.res.AppCompatResources
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
@@ -156,7 +157,7 @@ class RecordingNotificationHelper(private val context: Context) {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID_SERVICE)
             .setSmallIcon(R.drawable.ic_mic)
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            .setLargeIcon(AppCompatResources.getDrawable(context, R.drawable.ic_callreplay)?.toBitmap(128, 128))
             .setContentTitle(context.getString(titleRes))
             .setContentText(context.getString(contentRes))
             .setSubText(context.getString(subRes))
@@ -270,7 +271,7 @@ class RecordingNotificationHelper(private val context: Context) {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID_POST_RECORDING_FILE_ACTIONS)
             .setSmallIcon(R.drawable.ic_audio_file)
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            .setLargeIcon(AppCompatResources.getDrawable(context, R.drawable.ic_callreplay)?.toBitmap(128, 128))
             .setContentTitle(context.getString(R.string.post_recording_notification_title))
             .setContentText(callerText)
             .setAutoCancel(true)

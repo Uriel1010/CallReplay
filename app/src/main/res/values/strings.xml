@@ -10,7 +10,7 @@
     <!-- ========================================== -->
     <!-- GENERAL MESSAGES & APP LEVEL               -->
     <!-- ========================================== -->
-    <string name="app_name" translatable="false">ShizuCallRecorder</string>
+    <string name="app_name" translatable="false">CallReplay</string>
     <string name="general_close">Close</string>
     <string name="general_continue">Continue</string>
     <string name="general_ok">OK</string>
@@ -335,4 +335,24 @@
     <string name="recording_shizuku_not_started">Shizuku-Server process is stopped. Please start Shizuku and ensure it is always able to run when the app wants to record audio.</string>
     <string name="recording_shizuku_permission_denied">Please allow the application to use Shizuku. Permission was denied.</string>
     <string name="recording_shizuku_auth_key_missing">Shizuku Intents authentication key is missing. Please enter it in the app settings.</string>
+    <string name="history_title">Recents</string>
+    <string name="history_settings">Settings</string>
+    <string name="history_subtitle">Your recorded calls, ready to replay.</string>
+    <string name="history_search">Search name, number or recording</string>
+    <string name="history_clear_search">Clear search</string>
+    <string name="history_all">All</string>
+    <string name="history_refresh">Refresh recordings</string>
+    <string name="history_today">Today</string>
+    <string name="history_yesterday">Yesterday</string>
+    <string name="history_imported">Existing recording</string>
+    <string name="history_empty">No recordings yet. Your recorded calls will appear here after they finish.</string>
+    <string name="history_no_matches">No recordings match your search or filter.</string>
+    <string name="history_folder_missing">Choose a recording folder in Settings to see your recordings.</string>
+    <string name="history_load_failed">Could not read your recordings. Check folder access in Settings, then refresh.</string>
+    <string name="history_play">Play recording of %1$s</string>
+    <string name="history_pause">Pause recording of %1$s</string>
+    <string name="history_play_failed">Unable to play this recording. The file may be unavailable or its format unsupported. Tap play to retry.</string>
+    <string name="history_progress">%1$s / %2$s</string>
+    <string name="history_seek">Recording position</string>
+    <string name="history_fork_attribution">Independent fork of ShizuCallRecorder · View original</string>
 </resources>

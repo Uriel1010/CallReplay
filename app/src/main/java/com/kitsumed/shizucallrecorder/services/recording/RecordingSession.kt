@@ -20,9 +20,11 @@ import com.kitsumed.shizucallrecorder.data.AppPreferences
 import com.kitsumed.shizucallrecorder.data.call.EnrichedCallData
 import com.kitsumed.shizucallrecorder.data.recording.RecordingFailure
 import com.kitsumed.shizucallrecorder.data.recording.RecordingPlan
+import com.kitsumed.shizucallrecorder.data.recording.RecordingHistoryRepository
 import com.kitsumed.shizucallrecorder.system.storage.SafHelper
 import com.kitsumed.shizucallrecorder.utils.AppLogger
 import com.kitsumed.shizucallrecorder.utils.RecordingFileNameFormatter
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Application-side owner of a single recording session.
@@ -89,6 +91,9 @@ class RecordingSession(
      * The remote shell service, or null if the recording session of this specific instance has been released or canceled.
      */
     private var shellService: IShellService? = remoteService
+
+    private val startedAt = System.currentTimeMillis()
+    private val historySaved = AtomicBoolean(false)
 
     /**
      * The callback implementation for receiving recording events from the remote recording engine.
@@ -179,6 +184,15 @@ class RecordingSession(
 
         shellService = null
         outputPfd = null
+
+        if (historySaved.compareAndSet(false, true)) {
+            currentRecordingUri?.let { uri ->
+                // Metadata failure must never prevent the audio file from being finalized.
+                runCatching {
+                    RecordingHistoryRepository(context).use { it.save(uri, startedAt, initializationMetadata) }
+                }.onFailure { AppLogger.w("Could not save recording history metadata.", it) }
+            }
+        }
     }
 
     /**

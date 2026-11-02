@@ -34,7 +34,7 @@ import com.kitsumed.shizucallrecorder.data.AppPreferences
 import com.kitsumed.shizucallrecorder.onboarding.OnboardingStatus
 import com.kitsumed.shizucallrecorder.ui.screens.DisclaimerScreen
 import com.kitsumed.shizucallrecorder.ui.screens.PermissionsScreen
-import com.kitsumed.shizucallrecorder.ui.screens.SettingsScreen
+import com.kitsumed.shizucallrecorder.ui.screens.RecorderHomeScreen
 import com.kitsumed.shizucallrecorder.ui.screens.SponsorScreen
 import com.kitsumed.shizucallrecorder.ui.theme.ShizuCallRecorderTheme
 import com.kitsumed.shizucallrecorder.ui.viewmodels.AppNavigationViewModel
@@ -159,8 +159,8 @@ fun AppNavigationScreen() {
                             showSponsorScreen = false // Trigger recompose
                         })
                     } else {
-                        SettingsScreen(
-                            viewModel = settingsViewModel
+                        RecorderHomeScreen(
+                            settingsViewModel = settingsViewModel
                         )
                     }
                 }
