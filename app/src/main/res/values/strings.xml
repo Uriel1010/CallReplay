@@ -335,10 +335,14 @@
     <string name="recording_shizuku_not_started">Shizuku-Server process is stopped. Please start Shizuku and ensure it is always able to run when the app wants to record audio.</string>
     <string name="recording_shizuku_permission_denied">Please allow the application to use Shizuku. Permission was denied.</string>
     <string name="recording_shizuku_auth_key_missing">Shizuku Intents authentication key is missing. Please enter it in the app settings.</string>
-    <string name="history_title">Recents</string>
+    <string name="history_title">Call logs</string>
     <string name="history_settings">Settings</string>
-    <string name="history_subtitle">Your recorded calls, ready to replay.</string>
-    <string name="history_search">Search name, number or recording</string>
+    <string name="history_search">Search calls</string>
+    <string name="history_search_hint">Name, number or filename</string>
+    <string name="history_app_caption">CallReplay · independent fork</string>
+    <string name="history_setup">Finish recording setup</string>
+    <string name="history_incoming">Incoming</string>
+    <string name="history_outgoing">Outgoing</string>
     <string name="history_clear_search">Clear search</string>
     <string name="history_all">All</string>
     <string name="history_refresh">Refresh recordings</string>
@@ -356,5 +360,5 @@
     <string name="history_seek">Recording position</string>
     <string name="history_share">Share recording of %1$s</string>
     <string name="history_share_failed">Unable to share this recording. Check that the file is still available and try again.</string>
-    <string name="history_fork_attribution">Independent fork of ShizuCallRecorder · View original</string>
+    <string name="history_fork_attribution">Fork of ShizuCallRecorder · Original project</string>
 </resources>

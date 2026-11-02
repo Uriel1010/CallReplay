@@ -35,6 +35,18 @@ private val DarkColorScheme = darkColorScheme(
     onTertiary = AccentGreenDark,
 
     surface = DarkSurface,
+    background = DarkSurface,
+    onBackground = OffWhiteText,
+    surfaceContainerLowest = DarkSurface,
+    surfaceContainerLow = DarkSurfaceContainer,
+    surfaceContainer = DarkSurfaceContainer,
+    surfaceContainerHigh = DarkSurfaceContainerHigh,
+    surfaceContainerHighest = DarkSurfaceVariant,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = GreenGrey80,
+    secondaryContainer = DarkGreyGreen,
+    onSecondaryContainer = GreenGrey80,
+    outlineVariant = DarkOutlineVariant,
     onSurface = OffWhiteText,
     outline = GreyGreenOutline
 )
@@ -49,6 +61,18 @@ private val LightColorScheme = lightColorScheme(
     onSecondary = White,
 
     surface = LightSurface,
+    background = LightSurface,
+    onBackground = NearBlackText,
+    surfaceContainerLowest = White,
+    surfaceContainerLow = LightSurface,
+    surfaceContainer = LightSurfaceContainer,
+    surfaceContainerHigh = LightSurfaceContainerHigh,
+    surfaceContainerHighest = LightSurfaceVariant,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightOnSurfaceVariant,
+    secondaryContainer = LightSurfaceContainerHigh,
+    onSecondaryContainer = DarkGreyGreen,
+    outlineVariant = LightOutlineVariant,
     onSurface = NearBlackText,
     outline = GreyGreenOutline
 )

@@ -54,6 +54,7 @@
         <!-- MainActivity must be run when Android want to show the application UI (with the app launcher) -->
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTop"
             android:exported="true"
             android:theme="@style/Theme.Shizucallrecorder">
             <intent-filter>

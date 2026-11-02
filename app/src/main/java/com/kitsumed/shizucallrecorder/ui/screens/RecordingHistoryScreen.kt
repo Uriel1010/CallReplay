@@ -12,6 +12,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -22,9 +24,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -32,6 +37,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -53,33 +59,64 @@ import java.time.format.FormatStyle
 import java.util.Date
 import kotlinx.coroutines.launch
 
-/** Recents is the home destination; the existing settings screen remains one tap away. */
+/** Call logs are the home destination; settings remain one tap away. */
 @Composable
-fun RecorderHomeScreen(settingsViewModel: SettingsViewModel) {
-    var settingsSelected by rememberSaveable { mutableStateOf(false) }
+fun RecorderHomeScreen(
+    settingsViewModel: SettingsViewModel,
+    launchGeneration: Int = 0,
+    recordingReady: Boolean = true,
+    onSetupRecording: () -> Unit = {}
+) {
+    var settingsSelected by rememberSaveable(launchGeneration) { mutableStateOf(false) }
     BackHandler(enabled = settingsSelected) { settingsSelected = false }
-    Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = !settingsSelected, onClick = { settingsSelected = false },
-                    icon = { Icon(Icons.Default.History, contentDescription = null) },
-                    label = { Text(stringResource(R.string.history_title)) }
-                )
-                NavigationBarItem(
-                    selected = settingsSelected, onClick = { settingsSelected = true },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                    label = { Text(stringResource(R.string.history_settings)) }
-                )
-            }
+    val content: @Composable () -> Unit = {
+        if (settingsSelected) {
+            SettingsScreen(viewModel = settingsViewModel)
+        } else {
+            RecordingHistoryScreen(
+                onOpenSettings = { settingsSelected = true },
+                onSetupRecording = if (recordingReady) null else onSetupRecording
+            )
         }
-    ) { padding ->
-        Box(Modifier.padding(padding).consumeWindowInsets(padding)) {
-            if (settingsSelected) {
-                SettingsScreen(viewModel = settingsViewModel)
-            } else {
-                RecordingHistoryScreen(onOpenSettings = { settingsSelected = true })
+    }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth >= 600.dp) {
+            Row(Modifier.fillMaxSize()) {
+                NavigationRail(Modifier.fillMaxHeight()) {
+                    NavigationRailItem(
+                        selected = !settingsSelected, onClick = { settingsSelected = false },
+                        icon = { Icon(Icons.Default.History, contentDescription = null) },
+                        label = { Text(stringResource(R.string.history_title)) }
+                    )
+                    NavigationRailItem(
+                        selected = settingsSelected, onClick = { settingsSelected = true },
+                        icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                        label = { Text(stringResource(R.string.history_settings)) }
+                    )
+                }
+                Box(Modifier.weight(1f)) { content() }
+            }
+        } else {
+            Scaffold(
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                bottomBar = {
+                    NavigationBar {
+                        NavigationBarItem(
+                            selected = !settingsSelected, onClick = { settingsSelected = false },
+                            icon = { Icon(Icons.Default.History, contentDescription = null) },
+                            label = { Text(stringResource(R.string.history_title)) }
+                        )
+                        NavigationBarItem(
+                            selected = settingsSelected, onClick = { settingsSelected = true },
+                            icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                            label = { Text(stringResource(R.string.history_settings)) }
+                        )
+                    }
+                }
+            ) { padding ->
+                Box(Modifier.padding(padding).consumeWindowInsets(padding)) {
+                    content()
+                }
             }
         }
     }
@@ -88,6 +125,7 @@ fun RecorderHomeScreen(settingsViewModel: SettingsViewModel) {
 @Composable
 private fun RecordingHistoryScreen(
     onOpenSettings: () -> Unit,
+    onSetupRecording: (() -> Unit)? = null,
     viewModel: RecordingHistoryViewModel = viewModel()
 ) {
     val state by viewModel.history.collectAsStateWithLifecycle()
@@ -112,7 +150,8 @@ private fun RecordingHistoryScreen(
                 scope.launch { snackbar.showSnackbar(shareError) }
             }
         },
-        snackbarHostState = snackbar
+        snackbarHostState = snackbar,
+        onSetupRecording = onSetupRecording
     )
 }
 
@@ -126,9 +165,12 @@ internal fun RecordingHistoryContent(
     onToggle: (RecordingHistoryEntry) -> Unit,
     onSeek: (Int) -> Unit,
     onShare: (RecordingHistoryEntry) -> Unit,
-    snackbarHostState: SnackbarHostState? = null
+    snackbarHostState: SnackbarHostState? = null,
+    onSetupRecording: (() -> Unit)? = null
 ) {
     val uriHandler = LocalUriHandler.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focus = LocalFocusManager.current
     var query by rememberSaveable { mutableStateOf("") }
     var directionToken by rememberSaveable { mutableStateOf<String?>(null) }
     val direction = CallDirection.fromToken(directionToken)
@@ -150,7 +192,15 @@ internal fun RecordingHistoryContent(
             snackbarHost = { snackbarHostState?.let { SnackbarHost(it) } },
             topBar = {
                 TopAppBar(
-                    title = { Text(stringResource(R.string.history_title)) },
+                    title = {
+                        Column {
+                            Text(stringResource(R.string.history_title), style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.history_app_caption), style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    },
+                    expandedHeight = 88.dp,
                     actions = {
                         IconButton(onClick = onRefresh, enabled = !state.loading) {
                             Icon(Icons.Default.Refresh, stringResource(R.string.history_refresh))
@@ -160,26 +210,15 @@ internal fun RecordingHistoryContent(
             }
         ) { padding ->
             LazyColumn(
-                Modifier.fillMaxSize().padding(padding).testTag("recording-history-list"),
+                Modifier.fillMaxSize().padding(padding).imePadding().testTag("recording-history-list"),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 item(key = "controls") {
                     Column {
-                        Text(
-                            stringResource(R.string.history_subtitle),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                        TextButton(
-                            onClick = { uriHandler.openUri("https://github.com/kitsumed/ShizuCallRecorder") },
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        ) {
-                            Text(stringResource(R.string.history_fork_attribution), style = MaterialTheme.typography.labelMedium)
-                        }
                         OutlinedTextField(
                             value = query, onValueChange = { query = it },
                             label = { Text(stringResource(R.string.history_search)) },
+                            placeholder = { Text(stringResource(R.string.history_search_hint)) },
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                             trailingIcon = {
                                 if (query.isNotEmpty()) IconButton(onClick = { query = "" }) {
@@ -187,6 +226,11 @@ internal fun RecordingHistoryContent(
                                 }
                             },
                             singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = {
+                                keyboard?.hide()
+                                focus.clearFocus()
+                            }),
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                         )
                         Row(
@@ -201,11 +245,20 @@ internal fun RecordingHistoryContent(
                                 FilterChip(
                                     selected = direction == option,
                                     onClick = { directionToken = option.token },
-                                    label = { Text(stringResource(option.labelResId)) }
+                                    label = { Text(stringResource(if (option == CallDirection.INCOMING)
+                                        R.string.history_incoming else R.string.history_outgoing)) }
                                 )
                             }
                         }
                         if (state.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
+                    }
+                }
+                if (onSetupRecording != null) item(key = "recording-setup") {
+                    FilledTonalButton(onClick = onSetupRecording,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        Icon(Icons.Default.MicOff, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.history_setup))
                     }
                 }
                 when {
@@ -221,15 +274,23 @@ internal fun RecordingHistoryContent(
                             item(key = "date:$date") {
                                 Text(
                                     dateLabel(date), style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
                                 )
                             }
                             items(calls, key = { it.uri.toString() }) { entry ->
                                 RecordingHistoryRow(entry, playback, { onToggle(entry) }, onSeek, { onShare(entry) })
-                                HorizontalDivider(Modifier.padding(horizontal = 16.dp))
+                                HorizontalDivider(Modifier.padding(start = 72.dp, end = 16.dp))
                             }
                         }
+                    }
+                }
+                item(key = "attribution") {
+                    TextButton(
+                        onClick = { uriHandler.openUri("https://github.com/kitsumed/ShizuCallRecorder") },
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)
+                    ) {
+                        Text(stringResource(R.string.history_fork_attribution), style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
@@ -245,7 +306,7 @@ private fun HistoryMessage(message: String, action: String? = null, onAction: ()
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Icon(Icons.Default.History, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        Text(message, style = MaterialTheme.typography.bodyLarge)
+        Text(message, style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.ContentOrLtr))
         if (action != null) OutlinedButton(onClick = onAction) { Text(action) }
     }
 }
@@ -264,15 +325,18 @@ private fun RecordingHistoryRow(
     val context = LocalContext.current
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.secondaryContainer) {
-                Icon(
-                    imageVector = when (entry.direction) {
-                        CallDirection.INCOMING -> Icons.AutoMirrored.Filled.CallReceived
-                        CallDirection.OUTGOING -> Icons.AutoMirrored.Filled.CallMade
-                        null -> Icons.Default.AudioFile
-                    },
-                    contentDescription = null, modifier = Modifier.padding(12.dp)
-                )
+            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                modifier = Modifier.size(40.dp)) {
+                Box(contentAlignment = Alignment.Center) {
+                    val name = entry.callerName?.trim().orEmpty()
+                    if (name.isNotEmpty()) {
+                        Text(String(Character.toChars(name.codePointAt(0))).uppercase(),
+                            style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    } else {
+                        Icon(Icons.Default.Person, contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
             Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                 Text(title, style = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.ContentOrLtr), fontWeight = FontWeight.Medium,
@@ -280,16 +344,27 @@ private fun RecordingHistoryRow(
                 if (!entry.callerName.isNullOrBlank() && entry.phoneNumber.isNotBlank()) {
                     Text(entry.phoneNumber, style = MaterialTheme.typography.bodyMedium.copy(textDirection = TextDirection.Ltr))
                 }
-                val direction = entry.direction?.let { stringResource(it.labelResId) }
-                    ?: stringResource(R.string.history_imported)
+                val direction = when (entry.direction) {
+                    CallDirection.INCOMING -> stringResource(R.string.history_incoming)
+                    CallDirection.OUTGOING -> stringResource(R.string.history_outgoing)
+                    null -> stringResource(R.string.history_imported)
+                }
                 val time = DateFormat.getTimeFormat(context).format(Date(entry.startedAt))
-                Text("$direction · $time", style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Icon(when (entry.direction) {
+                        CallDirection.INCOMING -> Icons.AutoMirrored.Filled.CallReceived
+                        CallDirection.OUTGOING -> Icons.AutoMirrored.Filled.CallMade
+                        null -> Icons.Default.AudioFile
+                    }, contentDescription = null, modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("$direction · $time", style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
             if (selected && playback.preparing) {
                 CircularProgressIndicator(Modifier.size(48.dp).padding(12.dp))
             } else {
-                IconButton(onClick = onToggle) {
+                FilledTonalIconButton(onClick = onToggle) {
                     val playing = selected && playback.playing
                     Icon(
                         if (playing) Icons.Default.Pause else Icons.Default.PlayArrow,
@@ -298,11 +373,12 @@ private fun RecordingHistoryRow(
                     )
                 }
             }
+            Spacer(Modifier.width(8.dp))
             IconButton(onClick = onShare) {
                 Icon(
                     Icons.Default.Share,
                     stringResource(R.string.history_share, title),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

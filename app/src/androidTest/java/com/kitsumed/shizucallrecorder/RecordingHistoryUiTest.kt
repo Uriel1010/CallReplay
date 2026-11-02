@@ -71,10 +71,10 @@ class RecordingHistoryUiTest {
     @Test
     fun filtersDirectionsAndShowsNoMatches() {
         show()
-        compose.onNodeWithText(text(R.string.general_incoming), substring = false).performClick()
+        compose.onNodeWithText(text(R.string.history_incoming), substring = false).performClick()
         compose.onNodeWithText("Alice Test").assertIsDisplayed()
         compose.onNodeWithText("Bob Test").assertDoesNotExist()
-        compose.onNodeWithText(text(R.string.general_outgoing), substring = false).performClick()
+        compose.onNodeWithText(text(R.string.history_outgoing), substring = false).performClick()
         compose.onNodeWithText("Bob Test").assertIsDisplayed()
         compose.onNodeWithText(text(R.string.history_search)).performTextInput("does-not-exist")
         compose.onNodeWithText(text(R.string.history_no_matches)).assertIsDisplayed()
@@ -106,7 +106,9 @@ class RecordingHistoryUiTest {
         }
         show(fontScale = 1.5f)
         compose.onNodeWithText(text(R.string.history_search)).performTextInput("Alice")
-        compose.onNodeWithTag("recording-history-list").performScrollToNode(hasText("Alice Test"))
+        compose.onNodeWithText(text(R.string.history_search)).performImeAction()
+        val playLabel = compose.activity.getString(R.string.history_play, "Alice Test")
+        compose.onNodeWithTag("recording-history-list").performScrollToNode(hasContentDescription(playLabel))
         compose.onNodeWithText("Alice Test").assertIsDisplayed()
         compose.onNodeWithContentDescription(compose.activity.getString(R.string.history_play, "Alice Test"))
             .assertIsDisplayed()
@@ -123,6 +125,15 @@ class RecordingHistoryUiTest {
                 action(layouts)
                 assertEquals(ResolvedTextDirection.Ltr, layouts.single().getParagraphDirection(0))
             }
+    }
+
+    @Test
+    fun recordingSetupDoesNotBlockBrowsing() {
+        var opened = false
+        show(onSetup = { opened = true })
+        compose.onNodeWithText("Alice Test").assertIsDisplayed()
+        compose.onNodeWithText(text(R.string.history_setup)).performClick()
+        compose.runOnIdle { assertEquals(true, opened) }
     }
 
     @Test
@@ -144,6 +155,7 @@ class RecordingHistoryUiTest {
         forceRtl: Boolean = false,
         onToggle: (RecordingHistoryEntry) -> Unit = {},
         onShare: (RecordingHistoryEntry) -> Unit = {},
+        onSetup: (() -> Unit)? = null,
         onSettings: () -> Unit = {}
     ) {
         compose.setContent {
@@ -154,7 +166,8 @@ class RecordingHistoryUiTest {
                     LocalDensity provides Density(density.density, fontScale),
                     LocalLayoutDirection provides direction
                 ) {
-                    RecordingHistoryContent(state, RecordingPlaybackState(), onSettings, {}, onToggle, {}, onShare)
+                    RecordingHistoryContent(state, RecordingPlaybackState(), onSettings, {}, onToggle, {}, onShare,
+                        onSetupRecording = onSetup)
                 }
             }
         }

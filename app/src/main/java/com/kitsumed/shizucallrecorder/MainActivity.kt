@@ -9,6 +9,10 @@
 package com.kitsumed.shizucallrecorder
 
 import android.os.Bundle
+import android.content.Intent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -21,11 +25,27 @@ import androidx.appcompat.app.AppCompatActivity
  *
  */
 class MainActivity : AppCompatActivity() {
+    private var launchGeneration by mutableIntStateOf(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        launchGeneration = savedInstanceState?.getInt("launch_generation") ?: 0
         enableEdgeToEdge()
         setContent {
-            AppNavigationScreen()
+            AppNavigationScreen(launchGeneration)
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_LAUNCHER)) {
+            launchGeneration++
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("launch_generation", launchGeneration)
+        super.onSaveInstanceState(outState)
     }
 }

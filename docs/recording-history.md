@@ -1,19 +1,30 @@
 # CallReplay: recorded call history
 
 CallReplay is an independent fork of [ShizuCallRecorder](https://github.com/kitsumed/ShizuCallRecorder).
-It adds a Recents home screen while retaining the original recording engine and settings.
+It adds a Call logs home screen while retaining the original recording engine and settings.
 The installable package is `io.github.uriel1010.callreplay`, so it can coexist with the original app.
 The original license and attribution remain in place. This feature was implemented with OpenAI Codex assistance.
 
-## Using Recents
+## Using call logs
 
 1. Complete the existing setup and choose a recording folder in Settings.
-2. Open Recents to browse recordings, newest first, grouped by day.
+2. Open Call logs to browse recordings, newest first, grouped by day. This is the default destination.
 3. Search by caller name, phone number, or filename. Filter incoming or outgoing recordings.
 4. Tap play to listen in the app. Pause or seek using the controls beneath the selected call.
    Use the share button beside a recording to open Android's share menu with the audio attached.
    The chosen recipient receives temporary read access to that recording.
-5. Refresh after adding or deleting files outside the app. Recents also refreshes on resume.
+5. Refresh after adding or deleting files outside the app. The list also refreshes on resume.
+
+After the one-time disclaimer, call logs open even when recording prerequisites are missing.
+Use “Finish recording setup” to open the recording permission checklist when needed. Opening the
+app from its launcher returns to call logs, including when Settings was the previous destination.
+Automatic sponsor-screen interruptions no longer replace the home screen. Narrow windows use
+bottom navigation; wide windows use a navigation rail. Search's keyboard action dismisses the
+keyboard, and the list handles keyboard insets so playback controls remain reachable.
+
+The interface was refined using [Impeccable](https://github.com/pbakaus/impeccable)'s native Android
+polish workflow: Material color roles, coherent green surfaces, caller initials, clearer hierarchy,
+consistent action spacing, and checks on real phone renders in light/dark, RTL, and landscape modes.
 
 Recents displays recorded calls from the selected folder, including nested folders. It does not
 request system call-log access or display missed and unrecorded calls. Existing audio files appear

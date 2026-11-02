@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.update
  * The "Brain" of the top-level navigation routing.
  *
  * Owns the [onboardingStatus] `StateFlow` that [AppNavigationScreen] observes to decide
- * which of three destinations to show (disclaimer → permissions → settings).
+ * when the one-time disclaimer or explicitly requested recording setup is needed.
  *
  */
 class AppNavigationViewModel(application: Application) : AndroidViewModel(application) {
@@ -54,7 +54,7 @@ class AppNavigationViewModel(application: Application) : AndroidViewModel(applic
      *
      * [AppNavigationScreen] uses `collectAsState()` to observe this flow; whenever a permission
      * is granted or the disclaimer is accepted, [refresh] pushes a new [OnboardingStatus.Status]
-     * which triggers a refresh (recompose) and the router advances to the correct screen.
+     * which refreshes recording readiness and completes the optional setup flow.
      */
     val onboardingStatus: StateFlow<OnboardingStatus.Status> = _onboardingStatus.asStateFlow()
 
