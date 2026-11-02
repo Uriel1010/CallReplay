@@ -95,6 +95,8 @@ private fun RecordingHistoryScreen(
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val shareTitle = stringResource(R.string.general_share)
+    val shareError = stringResource(R.string.history_share_failed)
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.stopPlayback() }
     DisposableEffect(viewModel) { onDispose { viewModel.stopPlayback() } }
@@ -105,9 +107,9 @@ private fun RecordingHistoryScreen(
             try {
                 val mimeType = context.contentResolver.getType(entry.uri)
                 val intent = recordingShareIntent(entry.uri, mimeType, entry.fileName)
-                context.startActivity(Intent.createChooser(intent, context.getString(R.string.general_share)))
+                context.startActivity(Intent.createChooser(intent, shareTitle))
             } catch (_: Exception) {
-                scope.launch { snackbar.showSnackbar(context.getString(R.string.history_share_failed)) }
+                scope.launch { snackbar.showSnackbar(shareError) }
             }
         },
         snackbarHostState = snackbar
