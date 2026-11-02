@@ -11,13 +11,13 @@ body:
       label: Checklist
       description: Please confirm the following before continuing
       options:
-        - label: I have searched existing [issues](https://github.com/kitsumed/ShizuCallRecorder/issues) and [discussions](https://github.com/kitsumed/ShizuCallRecorder/discussions/categories/community-support) and this is not a duplicate.
+        - label: I have searched existing [issues](https://github.com/Uriel1010/CallReplay/issues) and this is not a duplicate.
           required: true
-        - label: I am suggesting a new feature or enhancement for ShizuCallRecorder itself, NOT for Shizuku or another app.
+        - label: I am suggesting a feature for CallReplay, not for Shizuku or another app.
           required: true
-        - label: I have read the project [README.md](https://github.com/kitsumed/ShizuCallRecorder/blob/main/README.md) and [CONTRIBUTING.md](https://github.com/kitsumed/ShizuCallRecorder/blob/main/CONTRIBUTING.md).
+        - label: I have read the project [README.md](https://github.com/Uriel1010/CallReplay/blob/main/README.md) and [CONTRIBUTING.md](https://github.com/Uriel1010/CallReplay/blob/main/CONTRIBUTING.md).
           required: true
-        - label: I have read the application [docs](https://github.com/kitsumed/ShizuCallRecorder/blob/main/docs/SUPPORT.md).
+        - label: I have read the [setup guide](https://github.com/Uriel1010/CallReplay/blob/main/docs/SUPPORT.md).
           required: true
 
   - type: textarea

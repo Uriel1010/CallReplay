@@ -1,110 +1,112 @@
 # CallReplay
 
-**Independent fork of [ShizuCallRecorder](https://github.com/kitsumed/ShizuCallRecorder).**
-Adds a phone-style Recents screen with caller details, date groups, search, incoming/outgoing filters,
-and inline recording playback with pause and seeking. Existing recordings can be browsed too.
-Uses a distinct app name, icon, and package ID (`io.github.uriel1010.callreplay`).
+An Android call recorder with a phone-style call log: find a conversation, play its recording,
+or share it directly from the list. Includes Hebrew UI and right-to-left layouts.
 
-See [recording history and setup notes](docs/recording-history.md) for behavior, migration, and device checks.
-Implementation assisted by OpenAI Codex. The upstream documentation follows below and describes the original project.
+**Independent fork of [ShizuCallRecorder](https://github.com/kitsumed/ShizuCallRecorder),
+originally created by kitsumed (Med).** CallReplay uses its own name, icon and package ID:
+`io.github.uriel1010.callreplay`.
 
-## Original project
-[![GitHub Repo stars](https://img.shields.io/github/stars/kitsumed/ShizuCallRecorder?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHRpdGxlPnN0YXI8L3RpdGxlPjxwYXRoIGQ9Ik0xMiwxNy4yN0wxOC4xOCwyMUwxNi41NCwxMy45N0wyMiw5LjI0TDE0LjgxLDguNjJMMTIsMkw5LjE5LDguNjJMMiw5LjI0TDcuNDUsMTMuOTdMNS44MiwyMUwxMiwxNy4yN1oiIGZpbGw9IndoaXRlIiAvPjwvc3ZnPg%3D%3D&labelColor=gray&color=gold)](https://github.com/kitsumed/ShizuCallRecorder/graphs/traffic)
-[![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/kitsumed/ShizuCallRecorder/total?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHRpdGxlPmRvd25sb2FkPC90aXRsZT48cGF0aCBkPSJNNSwyMEgxOVYxOEg1TTE5LDlIMTVWM0g5VjlINUwxMiwxNkwxOSw5WiIgZmlsbD0id2hpdGUiIC8%2BPC9zdmc%2B&label=Downloads&labelColor=gray&color=gold&)](https://github.com/kitsumed/ShizuCallRecorder/releases/)
-[![GitHub Release](https://img.shields.io/github/v/release/kitsumed/ShizuCallRecorder?sort=semver&display_name=tag&style=for-the-badge&logo=testcafe&logoColor=white&label=Latest%20Release&labelColor=gray&color=blue)](https://github.com/kitsumed/ShizuCallRecorder/releases/latest)
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kitsumed/ShizuCallRecorder/build-app.yml?style=for-the-badge&label=Build%20Workflow)](https://github.com/kitsumed/ShizuCallRecorder/actions/workflows/build-app.yml)
-
-[![F-Droid All Downloads Public Stats](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgithub.com%2Fkitswas%2Ffdroid-metrics-dashboard%2Fraw%2Frefs%2Fheads%2Fmain%2Fprocessed%2Ftotal%2Fcom.kitsumed.shizucallrecorder.json&query=%24.total_downloads&logo=fdroid&label=Downloads%20(F-Droid)&color=gold&style=for-the-badge
-)](https://f-droid.org/packages/com.kitsumed.shizucallrecorder/)
-[![IzzyOnDroid Yearly Downloads](https://img.shields.io/badge/dynamic/json?url=https://dlstats.izzyondroid.org/iod-stats-collector/stats/basic/yearly/rolling.json&query=$.['com.kitsumed.shizucallrecorder']&logo=android&style=for-the-badge&label=Yearly%20downloads%20(IzzyOnDroid)&color=gold)](https://apt.izzysoft.de/packages/com.kitsumed.shizucallrecorder)
-
-The first **non-root FOSS call recorder app for Android 11+**! ShizuCallRecorder empowers ADB through Shizuku to use an [advanced list of permissions given to the shell application](https://cs.android.com/search?q=com.android.shell%20file:%2Fpackages%2FShell%2FAndroidManifest.xml).
-
-**This app main focus are Cellular/VoLTE calls, however, we do attempt to support Wifi-Calling and VoIP when possible**. Third-party app support ***is not guaranteed***, they may work provided they use Android Telecom.
+[Download a preview](https://github.com/Uriel1010/CallReplay/releases)
+· [Setup guide](docs/SUPPORT.md)
+· [Report an issue](https://github.com/Uriel1010/CallReplay/issues)
 
 ## Features
 
-- Records **both sides of phone calls** (incoming and outgoing)
-    - Should work even when using Bluetooth or a remote headset
-- **Separate uplink and downlink audio** inside a stereo recording
-- **Cellular/VoLTE capture**, with **best-effort support for *VoIP*** (and third-party apps) ***starting* Android 14+**
-- **Security** toggles to **manage Shizuku on/off state**
-    - An attempt to reduce the potential attack surface introduced by Shizuku
-    - Helps with apps that detect / yells at you when USB Debugging or Shizuku is enabled
-- **Automatic call recording** option with basic **exclusion rules**:
-    - Ignore anonymous calls
-    - Ignore specific contacts
-    - Ignore all contacts
-- Multiple codecs available: **Opus**, **AAC**, **HE-AAC-v1**, and more!
-- The app runs only on phone event changes, no persistent background process and notifications
+- Opens directly to **Call logs**, with caller details and recordings grouped by date.
+- Searches by contact name, phone number or filename; filters incoming and outgoing calls.
+- Plays, pauses and seeks within recordings without leaving the call log.
+- Shares recordings through the Android Sharesheet.
+- Finds existing recordings in your chosen folder, including nested folders.
+- Supports Hebrew, RTL layouts, light and dark themes, and adaptive navigation.
+- Retains upstream recording controls, automatic recording rules, audio sources and codecs.
 
-## Requirements
-- **Android 12** or more recent*.
-    - **Look at the *Android Tested Versions* table** for more informations on limitations.
-- [Shizuku](https://github.com/thedjchi/Shizuku)* (we recommend [thedjchi](https://github.com/thedjchi) fork)
+The call log shows **recorded calls**, rather than every entry in the system Phone app.
+Older files without saved caller metadata appear by filename.
 
-<details>
-<summary><b>Android Tested Versions</b></summary>
-<b>I cannot extensively test all of these versions, so issues may arise. This table may change as more testing by other users is done.</b>
-    
-| Android Version | Supported | Note                                  |
-|-----------------|-----------|---------------------------------------|
-| 11              |**Limited**|**[Need Unlocked Screen](https://github.com/Genymobile/scrcpy/blob/3fcc177da5b6b4514d0e8e8d90d7d58d6731eac9/server/src/main/java/com/genymobile/scrcpy/audio/AudioDirectCapture.java#L56-L68)**, ⚠️No VoIP Support|
-| 12              | **Basic** |  ⚠️No VoIP Support  (Pixel may work) |
-| 13              | **Basic** |  ⚠️No VoIP Support  (Pixel may work) |   
-| 14              | Yes       |                                      |
-| 15              | Yes       |                                      |
-| 16              | Yes       |                                      |
-| 17              | Yes       |                                      |
+<img src="docs/screenshots/hebrew.png" alt="CallReplay Hebrew call log with a fictional contact, search, play and share controls" width="280">
 
-</details>
+*Actual device screenshot using synthetic caller details.*
 
-> [!IMPORTANT]  
-> This application makes use of hidden internal Android APIs. As such, it is prone to breaking in new Android releases or due to specific OEM modifications to the source code.
+## Install and set up
 
-## Installation
-⚠️⚠️⬇️**YOU WILL NEED TO DO SOME INITIAL CONFIGURATIONS**.⬇️⚠️⚠️
+1. Download `CallReplay-2.0.0-preview.1-debug.apk` from the
+   [releases page](https://github.com/Uriel1010/CallReplay/releases).
+2. Install the APK, allowing installation from your browser or file manager if Android asks.
+3. Open CallReplay and follow the initial setup. To record new calls, start
+   [Shizuku](https://github.com/thedjchi/Shizuku), grant the requested permissions, and choose
+   a recording folder. Existing recordings can be browsed without completing recording setup.
+4. For Hebrew, use **Settings → Language → עברית**, or leave the language on system default
+   when your phone uses Hebrew.
 
-**Please follow the installation instructions in the [SUPPORT documentation](./docs/SUPPORT.md)** under **Installation & Configuration**. 
+The current release is a **debug-signed preview**, matching the APK tested on a physical device.
+It is not a production-signed release. App version metadata is `2.0.0` (version code `20`);
+the release tag distinguishes this CallReplay preview from upstream versions.
 
-You can download the latest version [here](https://github.com/kitsumed/ShizuCallRecorder/releases/latest).
+Android 11+ is the installation minimum. Recording support depends on Android version, device
+manufacturer, audio source and Shizuku. See the [setup and compatibility guide](docs/SUPPORT.md).
+VoIP and Wi-Fi calling support is best effort. Test recording on your own device before relying on it.
 
-## Contributing
+## Hebrew and accessibility
 
-Please see the [contributing](./CONTRIBUTING.md) guide.
+All 225 translatable strings include Hebrew text: call logs, settings, setup, notifications and
+accessibility labels. Phone numbers and playback times keep their left-to-right ordering.
+Date headings follow the app language. Brand names, technical identifiers and the original
+nontranslatable legal disclaimer remain in their source language.
 
-<details>
-  <summary><strong>Translation hosting generously provided by <a href="https://hosted.weblate.org/engage/shizucallrecorder/">Weblate</a></strong>.</summary>
-  <p align="left">
-    <p><strong>NOTE:</strong> By default, Weblate will use your account creation email when making commits to GitHub (to give you credits). This would leak your email address, you can change this behavior in your account settings.</p>
-    <a href="https://hosted.weblate.org/engage/shizucallrecorder/">
-      <img src="https://hosted.weblate.org/widget/shizucallrecorder/horizontal-auto.svg" alt="Traduction Stats">
-    </a>
-  </p>
-</details>
+## Build and test
 
-## License
-The software is licensed under the [GNU General Public License, version 3 (GPL-3.0)](LICENSE). ⚠️ **Additional terms** under GNU GPL version 3 Section 7 are at the end of the file.
- - This License does not grant any rights in the trademarks, service marks, or logos of any Contributor.
- - *As example, the name "`ShizuCallRecorder`" and `com.kitsumed.shizucallrecorder` are the property of the copyright holder **kitsumed***.
+The project uses Java 17, Gradle 9.8.2, Android SDK platform 37 and build tools 36.0.0.
+The upstream project does not track the Gradle wrapper scripts or wrapper JAR, so install
+Gradle 9.8.2 first or generate a wrapper locally.
 
-I decided to use the **GPL-3.0** license, as no other FOSS call recording app for non-root devices exists yet, and I want to ensure that any potential future alternatives derived from this project remain FOSS.
+On Linux with a systemd user session, use the included script to keep local builds bounded:
 
-## Disclaimer
-**Recording phone calls may be subject to complex and varying laws in different countries and jurisdictions.** For example, you may need to **ensure you have consent** from all parties before recording conversations. The **developers and contributors are not responsible** for any misuse or legal consequences arising from the use of this application.
-You can **learn more on Wikipedia at**: [Telephone call recording laws](https://en.wikipedia.org/wiki/Telephone_call_recording_laws).
+```sh
+export JAVA_HOME=/path/to/jdk-17
+export ANDROID_HOME=/path/to/android-sdk
+export CALLREPLAY_GRADLE=/path/to/gradle-9.8.2/bin/gradle
+bash scripts/build-local-limited.sh :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug
+```
 
-**If you are legally required to inform or ask someone for consent before recording**, please note that the application **DOES NOT handle this for you**.
-In some cases, certain features, like automatic call recording, may not be legally allowed. It is your responsibility to ensure compliance with applicable laws. **This is not legal advice**. Please **consult a legal professional for guidance** regarding your specific situation.
+The script requires at least 4 GiB available memory and limits the build to 2.5 GiB memory,
+no build swap, one Gradle worker and two CPUs worth of processing. It requires systemd user scopes.
+On other build environments, configure equivalent resource limits before invoking Gradle.
 
-> [!CAUTION]
-> ### **APPLICATION BEHAVIOR**
-> Due to the evolving Android ecosystem and varying hardware (OEMs), this software is subject to **non-deterministic behavior**:
-> * **Concurrent Calls:** The app may fail to detect transitions (e.g., while in a call, a second incoming call arrives, or switching between held calls). In these scenarios, the application may **continue to record audio into a single continuous file** without separate notifications or new notifications prompts for subsequent callers.
-> * **Filter Logic Limitations**: **Due to Android privacy-driven restrictions on real-time phone number access**, the app may relies, depending on the call detection mode, on fetching deprecated or unstable values. Theses initial check could be used to decide whether to automatically record based on your settings. **In cases where we receive the value too late, receive invalid data, or receive no data, the application is likely to consider the call as "anonymous" in its decision process**.
-> * **Unforeseen Failures:** Future OS updates, bugs, design choices in the app, or undocumented system behaviors may cause the app to start and/or continue recording, or fail, in a unexpected manner.
->
-> ### **USER AWARENESS**
-> Because deterministic behavior of the application cannot be guaranteed, it is your responsibility to:
-> 1. Ensure the recording behavior and your application settings aligns with your intent and the specific requirements in your jurisdiction.
-> 2. **Monitor the app's behavior** on your specific device. If you observe any behavior that does not comply with your local laws, you **must immediately cease any activity that constitutes a legal infraction** (For example, hanging up the call, deleting the audio files, etc).
+Install and run the device tests:
+
+```sh
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb shell am instrument -w io.github.uriel1010.callreplay.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+The preview passed **17 instrumentation tests** on a physical CPH2747: default launch behavior,
+playback lifecycle, seeking, metadata persistence, search, filters, share intents, Hebrew text,
+RTL phone numbers, and landscape with large text. Lint completed with zero errors and 117 warnings.
+These checks use synthetic contacts and audio; they do not establish call-capture compatibility
+across devices. See [implementation and verification notes](docs/recording-history.md).
+
+## Contributing and releases
+
+Please report CallReplay issues in [this repository](https://github.com/Uriel1010/CallReplay/issues),
+including your device, Android version and steps to reproduce. Remove private caller details
+before attaching logs. See [CONTRIBUTING.md](CONTRIBUTING.md) for the inherited contribution guide.
+
+Published releases include an APK, SHA-256 checksum and release notes. Matching source is
+available through the release tag and GitHub's source archives.
+
+## Credits and license
+
+CallReplay builds on [ShizuCallRecorder](https://github.com/kitsumed/ShizuCallRecorder)
+by **kitsumed (Med)** and its contributors. Original copyright notices and project history are
+preserved. Fork implementation was assisted by OpenAI Codex. You can support the original
+author through [GitHub Sponsors](https://github.com/sponsors/kitsumed).
+
+Licensed under [GNU GPL v3 or later, with additional terms under Section 7](LICENSE).
+CallReplay is an independent modified version and is not an official upstream release.
+The [inherited project overview](README.upstream.md) is retained for reference.
+
+Recording calls may require consent or notification under applicable law. The app does not
+obtain consent or notify participants for you. Read the in-app disclaimer and
+[upstream usage notes](docs/SUPPORT.md) before recording.

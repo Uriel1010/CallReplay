@@ -11,11 +11,11 @@ body:
       label: Checklist
       description: Please confirm the following before continuing
       options:
-        - label: I have read the application [docs](https://github.com/kitsumed/ShizuCallRecorder/blob/main/docs/SUPPORT.md), searched existing [issues](https://github.com/kitsumed/ShizuCallRecorder/issues) and [discussions](https://github.com/kitsumed/ShizuCallRecorder/discussions/categories/community-support) and this is not a duplicate
+        - label: I have read the [setup guide](https://github.com/Uriel1010/CallReplay/blob/main/docs/SUPPORT.md), searched existing [issues](https://github.com/Uriel1010/CallReplay/issues) and this is not a duplicate
           required: true
         - label: I am using the latest version of the project
           required: true
-        - label: I am reporting an issue with ShizuCallRecorder itself, NOT an issue about Shizuku or another app
+        - label: I am reporting an issue with CallReplay, not with Shizuku or another app
           required: true
         - label: I have attached or pasted the required log files below (or explained why they are unavailable)
           required: true
@@ -23,7 +23,7 @@ body:
   - type: input
     id: appVersion
     attributes:
-      label: ShizuCallRecorder Version
+      label: CallReplay version and release tag
       description: The version of your app. Please ensure you tried the latest version.
       placeholder: e.g. v1.0.2
     validations:
