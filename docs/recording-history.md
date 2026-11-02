@@ -86,6 +86,21 @@ Before relying on the fork on a phone, check:
 - Rotate the screen; verify playback stops and only one player can run afterward.
 - Check small phones, landscape, large text, TalkBack, and both app themes.
 
+## Hebrew interface
+
+Hebrew is available in Settings → Language → עברית and in Android per-app language settings.
+The system-default option follows the phone language. Hebrew resources use Android's legacy
+`values-iw` qualifier; the language picker normalizes this legacy tag to `he` so the
+selected language stays visible after the activity restarts.
+All 225 translatable strings are localized, including call logs, settings, setup, accessibility
+labels and notifications. Brand names, technical source/codec identifiers and the original
+nontranslatable license/disclaimer text retain their source language. The welcome text explicitly
+identifies the English disclaimer. Date headings use the app locale; phone numbers and playback
+times retain left-to-right ordering in RTL layouts.
+
+The Hebrew device UI test uses a synthetic Hebrew contact and verifies translated labels,
+search, the share target, Hebrew text direction and the plus prefix on phone numbers.
+
 ## Implementation references
 
 - [Android document storage](https://developer.android.com/training/data-storage/shared/documents-files)

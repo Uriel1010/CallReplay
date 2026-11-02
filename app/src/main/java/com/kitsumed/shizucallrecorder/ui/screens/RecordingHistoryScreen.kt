@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalFocusManager
@@ -409,7 +410,8 @@ private fun RecordingHistoryRow(
 private fun dateLabel(date: LocalDate): String = when (date) {
     LocalDate.now() -> stringResource(R.string.history_today)
     LocalDate.now().minusDays(1) -> stringResource(R.string.history_yesterday)
-    else -> date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+    else -> date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+        .withLocale(LocalConfiguration.current.locales[0]))
 }
 
 internal fun formatPlaybackTime(milliseconds: Int): String {

@@ -5,6 +5,9 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.TextLayoutResult
@@ -30,6 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.rules.TestName
 import java.io.File
+import java.util.Locale
 
 /** Exercises the production Recents UI with synthetic caller data; no setup bypass is persisted. */
 @RunWith(AndroidJUnit4::class)
@@ -51,6 +55,34 @@ class RecordingHistoryUiTest {
         File(directory, "${testName.methodName}.png").outputStream().use { output ->
             compose.onRoot().captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, output)
         }
+    }
+
+    @Test
+    fun hebrewLabelsSearchAndShareWorkWithRtlNumbers() {
+        var shared: Uri? = null
+        val hebrewEntries = entries.mapIndexed { index, entry ->
+            if (index == 0) entry.copy(callerName = "נועה בדיקה") else entry
+        }
+        show(RecordingHistoryState(hebrewEntries, loading = false), hebrew = true,
+            onShare = { shared = it.uri })
+        compose.onNodeWithText("יומן שיחות").assertIsDisplayed()
+        compose.onNodeWithText("חיפוש שיחות").performTextInput("נועה")
+        compose.onNodeWithText("Bob Test").assertDoesNotExist()
+        compose.onNodeWithText("חיפוש שיחות").performImeAction()
+        compose.onNodeWithContentDescription("שיתוף ההקלטה של נועה בדיקה").performClick()
+        compose.runOnIdle { assertEquals(entries.first().uri, shared) }
+        compose.onNodeWithText("נועה בדיקה")
+            .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
+                val layouts = mutableListOf<TextLayoutResult>()
+                action(layouts)
+                assertEquals(ResolvedTextDirection.Rtl, layouts.single().getParagraphDirection(0))
+            }
+        compose.onNodeWithText("+972500000001")
+            .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
+                val layouts = mutableListOf<TextLayoutResult>()
+                action(layouts)
+                assertEquals(ResolvedTextDirection.Ltr, layouts.single().getParagraphDirection(0))
+            }
     }
 
     @Test
@@ -153,15 +185,29 @@ class RecordingHistoryUiTest {
         dark: Boolean = false,
         fontScale: Float = 1f,
         forceRtl: Boolean = false,
+        hebrew: Boolean = false,
         onToggle: (RecordingHistoryEntry) -> Unit = {},
         onShare: (RecordingHistoryEntry) -> Unit = {},
         onSetup: (() -> Unit)? = null,
         onSettings: () -> Unit = {}
     ) {
         compose.setContent {
+            val baseContext = LocalContext.current
+            val configuration = LocalConfiguration.current
+            val localizedContext = if (hebrew) {
+                baseContext.createConfigurationContext(Configuration(configuration).apply {
+                    setLocale(Locale.forLanguageTag("he"))
+                    setLayoutDirection(Locale.forLanguageTag("he"))
+                })
+            } else baseContext
+            CompositionLocalProvider(
+                LocalContext provides localizedContext,
+                LocalConfiguration provides localizedContext.resources.configuration,
+                LocalResources provides localizedContext.resources
+            ) {
             ShizuCallRecorderTheme(darkTheme = dark, dynamicColor = false) {
                 val density = LocalDensity.current
-                val direction = if (forceRtl) LayoutDirection.Rtl else LocalLayoutDirection.current
+                val direction = if (forceRtl || hebrew) LayoutDirection.Rtl else LocalLayoutDirection.current
                 CompositionLocalProvider(
                     LocalDensity provides Density(density.density, fontScale),
                     LocalLayoutDirection provides direction
@@ -169,6 +215,7 @@ class RecordingHistoryUiTest {
                     RecordingHistoryContent(state, RecordingPlaybackState(), onSettings, {}, onToggle, {}, onShare,
                         onSetupRecording = onSetup)
                 }
+            }
             }
         }
     }

@@ -370,7 +370,8 @@ private fun VisualSection(preferences: AppPreferences, updateTrigger: Int, actio
                         val displayName = locale.getDisplayName(locale).replaceFirstChar {
                             if (it.isLowerCase()) it.titlecase(locale) else it.toString()
                         }
-                        options.add(OptionItem(localeName, displayName))
+                        // Android resources use legacy tags such as iw; AppCompat returns he.
+                        options.add(OptionItem(locale.toLanguageTag(), displayName))
                     }
                 }
                 eventType = parser.next()
