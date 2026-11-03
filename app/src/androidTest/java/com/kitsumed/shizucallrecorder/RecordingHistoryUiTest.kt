@@ -64,20 +64,21 @@ class RecordingHistoryUiTest {
             if (index == 0) entry.copy(callerName = "נועה בדיקה") else entry
         }
         show(RecordingHistoryState(hebrewEntries, loading = false), hebrew = true,
+            playback = RecordingPlaybackState(uri = entries.first().uri, duration = 60000),
             onShare = { shared = it.uri })
-        compose.onNodeWithText("יומן שיחות").assertIsDisplayed()
+        compose.onNodeWithText("חיפוש שיחות").assertIsDisplayed()
         compose.onNodeWithText("חיפוש שיחות").performTextInput("נועה")
         compose.onNodeWithText("Bob Test").assertDoesNotExist()
         compose.onNodeWithText("חיפוש שיחות").performImeAction()
         compose.onNodeWithContentDescription("שיתוף ההקלטה של נועה בדיקה").performClick()
         compose.runOnIdle { assertEquals(entries.first().uri, shared) }
-        compose.onNodeWithText("נועה בדיקה")
+        compose.onNodeWithText("נועה בדיקה", useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
                 val layouts = mutableListOf<TextLayoutResult>()
                 action(layouts)
                 assertEquals(ResolvedTextDirection.Rtl, layouts.single().getParagraphDirection(0))
             }
-        compose.onNodeWithText("+972500000001")
+        compose.onNodeWithText("+972500000001", useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
                 val layouts = mutableListOf<TextLayoutResult>()
                 action(layouts)
@@ -124,7 +125,7 @@ class RecordingHistoryUiTest {
     @Test
     fun shareButtonTargetsTheCorrectRecording() {
         var selected: Uri? = null
-        show(onShare = { selected = it.uri })
+        show(onShare = { selected = it.uri }, playback = RecordingPlaybackState(uri = entries.first().uri, duration = 60000))
         compose.onNodeWithContentDescription(compose.activity.getString(R.string.history_share, "Alice Test"))
             .performClick()
         compose.runOnIdle { assertEquals(entries.first().uri, selected) }
@@ -144,14 +145,12 @@ class RecordingHistoryUiTest {
         compose.onNodeWithText("Alice Test").assertIsDisplayed()
         compose.onNodeWithContentDescription(compose.activity.getString(R.string.history_play, "Alice Test"))
             .assertIsDisplayed()
-        compose.onNodeWithContentDescription(compose.activity.getString(R.string.history_share, "Alice Test"))
-            .assertIsDisplayed()
     }
 
     @Test
     fun phoneNumbersKeepTheirPlusPrefixInRtlLayouts() {
         show(forceRtl = true)
-        compose.onNodeWithText("+972500000001")
+        compose.onNodeWithText("+972500000001", useUnmergedTree = true)
             .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
                 val layouts = mutableListOf<TextLayoutResult>()
                 action(layouts)
@@ -182,6 +181,7 @@ class RecordingHistoryUiTest {
 
     private fun show(
         state: RecordingHistoryState = RecordingHistoryState(entries, loading = false),
+        playback: RecordingPlaybackState = RecordingPlaybackState(),
         dark: Boolean = false,
         fontScale: Float = 1f,
         forceRtl: Boolean = false,
@@ -212,8 +212,8 @@ class RecordingHistoryUiTest {
                     LocalDensity provides Density(density.density, fontScale),
                     LocalLayoutDirection provides direction
                 ) {
-                    RecordingHistoryContent(state, RecordingPlaybackState(), onSettings, {}, onToggle, {}, onShare,
-                        onSetupRecording = onSetup)
+                    RecordingHistoryContent(state, playback, onSettings, {}, onToggle, {}, onShare,
+                        onSetupRecording = onSetup, initialSearchExpanded = true)
                 }
             }
             }

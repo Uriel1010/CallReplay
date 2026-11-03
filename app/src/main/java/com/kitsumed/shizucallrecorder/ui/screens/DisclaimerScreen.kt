@@ -1,280 +1,75 @@
-/*
- * ShizuCallRecorder: FOSS Call recording powered through ADB/Shizuku!
- *  Copyright (C) 2026-present kitsumed (Med)
- *  This software is licensed under the GNU General Public License v3 or later, with additional terms as permitted under Section 7.
- *  The full license text is available in the LICENSE file at the root of this project.
- *  This software is distributed WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- */
-
+/* Copyright (C) 2026 kitsumed (Med), Uriel Maznur. GPL-3.0-or-later; see LICENSE. */
 package com.kitsumed.shizucallrecorder.ui.screens
 
-import android.content.Context
-import android.view.accessibility.AccessibilityManager
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.LinkInteractionListener
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineBreak
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.kitsumed.shizucallrecorder.AppUrls
 import com.kitsumed.shizucallrecorder.BuildConfig
 import com.kitsumed.shizucallrecorder.R
-import com.kitsumed.shizucallrecorder.ui.theme.ShizuCallRecorderTheme
 import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
-
-/**
- * One-time disclaimer screen shown on first launch.
- *
- * @param onContinue Called when the user presses the enabled "Continue" button. The caller
- *                   ([AppNavigation]) then persists the acceptance flag and triggers a refresh
- *                   (recompose) so the router advances to the Permissions screen.
- * @param modifier   Optional size/position modifier forwarded to the root [Surface].
- */
 @Composable
 fun DisclaimerScreen(onContinue: () -> Unit, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    // [rememberSaveable] allow for the values to survive configuration
-    // changes (like when recompose is triggered by a screen rotation)
-    var hasAccepted by rememberSaveable { mutableStateOf(false) }
-    var timeLeft by rememberSaveable { mutableIntStateOf(if (BuildConfig.DEBUG) 4 else 30) }
-
-    val scrollState = rememberScrollState()
-    val hasScrolledToBottom by remember {
-        // Only trigger update (recompose) when boolean operation result change
-        derivedStateOf {
-            !scrollState.canScrollForward || scrollState.maxValue == 0
+    var accepted by rememberSaveable { mutableStateOf(false) }
+    var openedLegal by rememberSaveable { mutableStateOf(false) }
+    var legal by rememberSaveable { mutableStateOf(false) }
+    var remaining by rememberSaveable { mutableIntStateOf(if(BuildConfig.DEBUG) 4 else 30) }
+    LaunchedEffect(Unit) { while(remaining > 0) { delay(1000); remaining-- } }
+    BackHandler(legal) { legal = false }
+    if(legal) ReplayPage(stringResource(R.string.general_licenses), { legal = false }) { padding ->
+        Column(Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
+            Text(stringResource(R.string.disclaimer_body), style = MaterialTheme.typography.bodyMedium.copy(
+                textDirection = androidx.compose.ui.text.style.TextDirection.Ltr))
+            Button(onClick = { openedLegal = true; legal = false }, modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
+                Text(stringResource(R.string.general_continue)) }
         }
-    }
-    val isTalkBackEnabled = remember(context) {
-        val accService = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-        accService.isEnabled && accService.isTouchExplorationEnabled
-    }
-
-    // Countdown timer: decrements timeLeft once per second until it reaches 0.
-    LaunchedEffect(Unit) {
-        while (timeLeft > 0) {
-            delay(1.seconds)
-            timeLeft--
-        }
-    }
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .safeDrawingPadding()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            // Title
-            Text(
-                text = stringResource(R.string.disclaimer_title),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            // Introduction paragraph with a hyperlinked "Wiki" keyword
-            val links = mapOf(
-                stringResource(R.string.disclaimer_wiki_link_KEYWORD) to AppUrls.GITHUB_WIKI
-            )
-
-            HyperlinkText(stringResource(R.string.disclaimer_introduction), links)
-
-            Spacer(modifier = Modifier.height(1.dp))
-
-            // Elevated card gives visual depth to the scrollable disclaimer body.
-            ElevatedCard(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            ) {
-                SelectionContainer {
-                    Text(
-                        text = stringResource(R.string.disclaimer_body),
-                        modifier = Modifier
-                            .verticalScroll(scrollState)
-                            .padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            lineBreak = LineBreak.Paragraph
-                        )
-                    )
+    } else Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Column(Modifier.safeDrawingPadding().fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Spacer(Modifier.height(8.dp)); WaveMark(40.dp, square = true)
+            Text("CallReplay", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.replay_welcome), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.replay_disclaimer_intro), style = MaterialTheme.typography.bodySmall)
+            OutlinedCard(shape = RoundedCornerShape(16.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    listOf(R.string.replay_consent to Icons.Default.Balance,
+                        R.string.replay_device_limit to Icons.Default.Call,
+                        R.string.replay_concurrent to Icons.Default.PeopleOutline,
+                        R.string.replay_caller_limit to Icons.Default.PersonOutline,
+                        R.string.replay_capture_limit to Icons.Default.WarningAmber).forEach { (text, icon) ->
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                            Icon(icon, null, tint = MaterialTheme.colorScheme.primary)
+                            Text(stringResource(text), style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
                 }
             }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            // Acknowledgement checkbox, only becomes interactive after the user scrolls down.
-            AnimatedContent(
-                targetState = hasScrolledToBottom || isTalkBackEnabled,
-                transitionSpec = {
-                    val enterFade = fadeIn(tween(600))
-                    val exitFade = fadeOut(tween(500))
-
-                    enterFade togetherWith exitFade                },
-                label = "CheckboxUnlockTransition"
-            ) { unlocked ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .toggleable(
-                            value = hasAccepted,
-                            onValueChange = { if (unlocked) hasAccepted = it },
-                            role = Role.Checkbox,
-                            enabled = unlocked
-                        )
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Checkbox(
-                        checked = hasAccepted,
-                        onCheckedChange = null, // Handled by the Row's toggleable modifier above.
-                        enabled = unlocked
-                    )
-                    Text(
-                        text = stringResource(R.string.disclaimer_checkbox_label),
-                        style = MaterialTheme.typography.bodyMedium,
-                        // Dim the label to signal it's not yet interactive.
-                        color = if (unlocked) MaterialTheme.colorScheme.onBackground
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                }
+            val uri = LocalUriHandler.current
+            TextButton(onClick = { uri.openUri("https://github.com/Uriel1010/CallReplay#install-and-set-up") }) {
+                Text(stringResource(R.string.settings_open_github_Wiki)) }
+            FilledTonalButton(onClick = { legal = true }) { Text(stringResource(R.string.replay_legal)) }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(accepted, { accepted = it }, enabled = openedLegal)
+                Text(stringResource(if(openedLegal) R.string.replay_acknowledge else R.string.replay_read_first),
+                    style = MaterialTheme.typography.bodySmall)
             }
-
-            // Continue button, enabled only when all three gates are satisfied.
-            val canContinue = hasAccepted && (hasScrolledToBottom || isTalkBackEnabled) && timeLeft == 0
-
-            Button(
-                onClick = onContinue,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = canContinue,
-            ) {
-                if (timeLeft > 0) {
-                    Text(text = stringResource(R.string.disclaimer_wait, timeLeft))
-                }
-                else if (!canContinue) {
-                    Text(text = stringResource(R.string.disclaimer_must_read))
-                }
-                else {
-                    Text(text = stringResource(R.string.general_continue))
-                }
+            Button(onClick = onContinue, enabled = accepted && remaining == 0,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
+                Text(if(remaining > 0) stringResource(R.string.disclaimer_wait, remaining) else stringResource(R.string.general_continue))
             }
+            Text(stringResource(R.string.history_fork_attribution), style = MaterialTheme.typography.labelSmall)
         }
-    }
-}
-
-
-/**
- * Renders [fullText] with inline clickable hyperlinks.
- *
- * Each entry in [links] maps a keyword substring to a URL. When the keyword is found in
- * [fullText], it is styled and tapping it opens the URL via [LocalUriHandler].
- *
- * @param fullText The complete plain-text string to display.
- * @param links    A map of keyword → URL pairs (e.g. `"Wiki" to "https://…"`).
- * @param modifier Optional layout modifier for the [Text] composable.
- */
-@Composable
-fun HyperlinkText(
-    fullText: String,
-    links: Map<String, String>,
-    modifier: Modifier = Modifier
-) {
-    val uriHandler = LocalUriHandler.current
-
-    // Build a LinkInteractionListener that opens the URL stored in the Clickable tag.
-    val listener = LinkInteractionListener { link ->
-        if (link is LinkAnnotation.Clickable) {
-            uriHandler.openUri(link.tag)
-        }
-    }
-
-    val annotatedText = buildAnnotatedString {
-        append(fullText)
-
-        links.forEach { (keyword, url) ->
-            val startIndex = fullText.indexOf(keyword)
-            if (startIndex != -1) {
-                val endIndex = startIndex + keyword.length
-
-                // addLink attaches a Clickable annotation over the keyword range.
-                addLink(
-                    clickable = LinkAnnotation.Clickable(
-                        tag = url,
-                        styles = TextLinkStyles(
-                            style = SpanStyle(
-                                textDecoration = TextDecoration.Underline,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        ),
-                        linkInteractionListener = listener
-                    ),
-                    start = startIndex,
-                    end = endIndex
-                )
-            }
-        }
-    }
-
-    Text(text = annotatedText, style = MaterialTheme.typography.bodyMedium, modifier = modifier)
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DisclaimerScreenPreview() {
-    ShizuCallRecorderTheme {
-        DisclaimerScreen(onContinue = {})
     }
 }

@@ -69,6 +69,24 @@ class RecordingHistoryDeviceTest {
     }
 
     @Test
+    fun speedAndMutePreservePausedStateAndResetOnStop() {
+        val entry = silentRecording("speed-mute-test.wav")
+        onMain { model.toggle(entry) }
+        await { model.playback.value.playing }
+        onMain { model.toggle(entry); model.setSpeed(1.5f); model.toggleMute() }
+        assertFalse(model.playback.value.playing)
+        assertEquals(1.5f, model.playback.value.speed)
+        assertTrue(model.playback.value.muted)
+        onMain { model.toggle(entry) }
+        await { model.playback.value.playing }
+        onMain { model.seek(999999) }
+        assertEquals(model.playback.value.duration, model.playback.value.position)
+        onMain { model.stopPlayback() }
+        assertEquals(1f, model.playback.value.speed)
+        assertFalse(model.playback.value.muted)
+    }
+
+    @Test
     fun switchingRecordingsReleasesPreviousPlayer() {
         val first = silentRecording("first-test.wav")
         val second = silentRecording("second-test.wav")

@@ -45,7 +45,9 @@ data class RecordingPlaybackState(
     val playing: Boolean = false,
     val position: Int = 0,
     val duration: Int = 0,
-    val failed: Boolean = false
+    val failed: Boolean = false,
+    val speed: Float = 1f,
+    val muted: Boolean = false
 )
 
 /** Foreground-only playback. Release on leaving Recents; never play over another audio app or call. */
@@ -169,6 +171,28 @@ class RecordingHistoryViewModel(application: Application) : AndroidViewModel(app
         runCatching { player?.seekTo(target) }.onSuccess {
             _playback.update { it.copy(position = target) }
         }.onFailure { playbackFailed() }
+    }
+
+    fun setSpeed(speed: Float) {
+        if (_playback.value.preparing || _playback.value.failed || player == null) return
+        val wasPlaying = _playback.value.playing
+        runCatching {
+            player?.playbackParams = android.media.PlaybackParams().setSpeed(speed)
+            // MediaPlayer may start automatically when playback parameters change.
+            if (!wasPlaying) player?.pause()
+        }.onSuccess { _playback.update { it.copy(speed = speed) } }.onFailure { playbackFailed() }
+    }
+
+    fun toggleMute() {
+        val muted = !_playback.value.muted
+        runCatching { player?.setVolume(if (muted) 0f else 1f, if (muted) 0f else 1f) }
+            .onSuccess { _playback.update { it.copy(muted = muted) } }
+    }
+
+    suspend fun delete(entry: RecordingHistoryEntry): Boolean = withContext(Dispatchers.IO) {
+        if (_playback.value.uri == entry.uri) withContext(Dispatchers.Main) { stopPlayback() }
+        runCatching { androidx.documentfile.provider.DocumentFile.fromSingleUri(context, entry.uri)?.delete() == true }
+            .getOrDefault(false)
     }
 
     fun stopPlayback() {

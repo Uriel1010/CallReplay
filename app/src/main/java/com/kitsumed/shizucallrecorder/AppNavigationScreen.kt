@@ -20,6 +20,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
+import com.kitsumed.shizucallrecorder.ui.screens.CallReplaySplashScreen
 import com.kitsumed.shizucallrecorder.data.AppPreferences
 import com.kitsumed.shizucallrecorder.ui.screens.DisclaimerScreen
 import com.kitsumed.shizucallrecorder.ui.screens.PermissionsScreen
@@ -41,6 +43,8 @@ fun AppNavigationScreen(launchGeneration: Int = 0) {
     val settingsUpdate by settings.updateTrigger.collectAsStateWithLifecycle()
     val preferences = settings.preferences
     var setupRequested by rememberSaveable(launchGeneration) { mutableStateOf(false) }
+    var splashComplete by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(450); splashComplete = true }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { navigation.refresh() }
     LaunchedEffect(settingsUpdate) { navigation.refresh() }
@@ -56,6 +60,7 @@ fun AppNavigationScreen(launchGeneration: Int = 0) {
     }
     ShizuCallRecorderTheme(darkTheme = darkTheme, dynamicColor = preferences.isDynamicColorEnabled()) {
         when {
+            !splashComplete -> CallReplaySplashScreen()
             !status.disclaimerAccepted -> DisclaimerScreen(onContinue = {
                 preferences.setDisclaimerAccepted(true)
                 navigation.refresh()
