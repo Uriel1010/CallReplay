@@ -1,0 +1,26 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="updates_title">App updates</string>
+    <string name="updates_check">Check for updates</string>
+    <string name="updates_checking">Checking GitHub releases…</string>
+    <string name="updates_current">You are up to date.</string>
+    <string name="updates_installed">Installed version: %1$s</string>
+    <string name="updates_available">Version %1$s is available</string>
+    <string name="updates_auto">Check automatically</string>
+    <string name="updates_auto_body">Contact GitHub when you open the app, at most once a day. Updates download only when you choose.</string>
+    <string name="updates_previews">Include preview releases</string>
+    <string name="updates_download">Download update</string>
+    <string name="updates_downloading">Downloading: %1$d%%</string>
+    <string name="updates_size">Download size: %1$s MB</string>
+    <string name="updates_install">Install update</string>
+    <string name="updates_ready">Update verified and ready. Android may ask you to allow installation from CallReplay.</string>
+    <string name="updates_later">Later</string>
+    <string name="updates_open_release">View on GitHub</string>
+    <string name="updates_network">Could not reach GitHub. Check your connection and try again.</string>
+    <string name="updates_rate_limit">GitHub is limiting requests. Please try again later.</string>
+    <string name="updates_invalid_release">The release information could not be verified. Please check the GitHub release.</string>
+    <string name="updates_invalid_apk">The update did not pass verification. It has not been installed.</string>
+    <string name="updates_incompatible">This update requires a newer Android version.</string>
+    <string name="updates_install_failed">Could not open the installer. Check installation permission and try again.</string>
+    <string name="updates_busy">Finish the current call or recording before installing an update.</string>
+    <string name="updates_privacy">Update checks send a normal request to GitHub. No call details or recordings are sent.</string>
+</resources>

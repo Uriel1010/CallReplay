@@ -29,12 +29,14 @@ class HomeLaunchDeviceTest {
         }
         val logs = compose.activity.getString(R.string.history_title)
         val settings = compose.activity.getString(R.string.history_settings)
-        compose.onAllNodesWithText(logs).assertCountEquals(2)
+        compose.onAllNodesWithText(logs).assertCountEquals(1)
         compose.onNodeWithText(compose.activity.getString(R.string.history_setup)).assertIsDisplayed()
         compose.onNode(hasText(settings) and hasClickAction()).performClick()
+        compose.onNodeWithText(compose.activity.getString(R.string.replay_setup)).assertIsDisplayed()
         compose.onAllNodesWithText(logs).assertCountEquals(1)
         compose.runOnIdle { launch.intValue++ }
-        compose.onAllNodesWithText(logs).assertCountEquals(2)
+        compose.onNodeWithText(compose.activity.getString(R.string.replay_setup)).assertDoesNotExist()
+        compose.onAllNodesWithText(logs).assertCountEquals(1)
         compose.onNodeWithText(compose.activity.getString(R.string.history_setup)).assertIsDisplayed()
     }
 }

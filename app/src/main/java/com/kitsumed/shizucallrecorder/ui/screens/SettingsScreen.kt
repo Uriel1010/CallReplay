@@ -336,7 +336,7 @@ private fun AboutSection(versionString: String) {
  * @param actions       Implementation of [SettingsActions] to handle user interaction.
  */
 @Composable
-private fun VisualSection(preferences: AppPreferences, updateTrigger: Int, actions: SettingsActions) {
+internal fun VisualSection(preferences: AppPreferences, updateTrigger: Int, actions: SettingsActions) {
     val currentThemeMode = remember(updateTrigger) { preferences.getThemeMode() }
     val isDynamicColorEnabled = remember(updateTrigger) { preferences.isDynamicColorEnabled() }
     val isShowToastsEnabled = remember(updateTrigger) { preferences.isShowToastsEnabled() }
@@ -403,11 +403,6 @@ private fun VisualSection(preferences: AppPreferences, updateTrigger: Int, actio
             options  = themeOptions,
             onOptionSelected = { actions.setThemeMode(AppPreferences.ThemeMode.fromKey(it.key)) },
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-        )
-        ToggleListItem(
-            label           = stringResource(R.string.settings_dynamic_color),
-            checked         = isDynamicColorEnabled,
-            onCheckedChange = { actions.setDynamicColorEnabled(it) }
         )
         ToggleListItem(
             label           = stringResource(R.string.settings_show_toasts),
@@ -783,7 +778,7 @@ private fun RecordingSection(
  * @param actions       Implementation of [SettingsActions] to handle user interaction.
  */
 @Composable
-private fun AudioSection(preferences: AppPreferences, updateTrigger: Int, actions: SettingsActions) {
+internal fun AudioSection(preferences: AppPreferences, updateTrigger: Int, actions: SettingsActions) {
     val isDebugEnabled = remember(updateTrigger) { preferences.isDebugEnabled() }
     val audioSource = remember(updateTrigger) { preferences.getAudioSource() }
     val audioCodec = remember(updateTrigger) { preferences.getAudioCodec() }

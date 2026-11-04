@@ -1,0 +1,26 @@
+<resources>
+    <string name="updates_title">עדכוני אפליקציה</string>
+    <string name="updates_check">בדיקת עדכונים</string>
+    <string name="updates_checking">מתבצעת בדיקת גרסאות ב־GitHub…</string>
+    <string name="updates_current">הגרסה שלך מעודכנת.</string>
+    <string name="updates_installed">גרסה מותקנת: %1$s</string>
+    <string name="updates_available">גרסה %1$s זמינה</string>
+    <string name="updates_auto">בדיקה אוטומטית</string>
+    <string name="updates_auto_body">פנייה ל־GitHub בפתיחת האפליקציה, לכל היותר פעם ביום. עדכונים יורדו רק לפי בחירתך.</string>
+    <string name="updates_previews">הכללת גרסאות מקדימות</string>
+    <string name="updates_download">הורדת עדכון</string>
+    <string name="updates_downloading">הורדה: %1$d%%</string>
+    <string name="updates_size">גודל ההורדה: %1$s MB</string>
+    <string name="updates_install">התקנת עדכון</string>
+    <string name="updates_ready">העדכון אומת ומוכן להתקנה. ייתכן שתידרש הרשאה להתקנה מ־CallReplay בהגדרות Android.</string>
+    <string name="updates_later">מאוחר יותר</string>
+    <string name="updates_open_release">הצגה ב־GitHub</string>
+    <string name="updates_network">לא ניתן להתחבר ל־GitHub. יש לבדוק את החיבור ולנסות שוב.</string>
+    <string name="updates_rate_limit">GitHub מגביל כעת את הבקשות. יש לנסות שוב מאוחר יותר.</string>
+    <string name="updates_invalid_release">לא ניתן לאמת את פרטי הגרסה. יש לבדוק את עמוד הגרסה ב־GitHub.</string>
+    <string name="updates_invalid_apk">העדכון לא עבר את בדיקות האימות ולא הותקן.</string>
+    <string name="updates_incompatible">לעדכון זה נדרשת גרסת Android חדשה יותר.</string>
+    <string name="updates_install_failed">לא ניתן לפתוח את המתקין. יש לבדוק את הרשאת ההתקנה ולנסות שוב.</string>
+    <string name="updates_busy">יש לסיים את השיחה או ההקלטה לפני התקנת העדכון.</string>
+    <string name="updates_privacy">בדיקות עדכון שולחות בקשה רגילה ל־GitHub. פרטי שיחות והקלטות אינם נשלחים.</string>
+</resources>

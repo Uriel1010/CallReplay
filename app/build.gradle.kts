@@ -66,8 +66,8 @@ android {
         targetSdk = 37
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Keep theses two values hard-coded here and update them per version. (To keep F-Droid compatibility since their parser is very basic)
-        versionCode = 20
-        versionName = "2.0.0"
+        versionCode = 22
+        versionName = "2.1.0"
     }
     signingConfigs {
         // Signing config for CI environments.
@@ -167,6 +167,7 @@ aboutLibraries {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation(platform(libs.androidx.compose.bom))

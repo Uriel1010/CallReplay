@@ -33,9 +33,14 @@ render.experimental.xml
 # Keystore files
 *.jks
 *.keystore
+*.p12
+*.pem
 
 # Android Profiling
 *.hprof
 
 # Idk but I don't want to commit theses
 .kotlin/sessions/*
+
+# Native review captures stay in local verification artifacts.
+.impeccable/review/

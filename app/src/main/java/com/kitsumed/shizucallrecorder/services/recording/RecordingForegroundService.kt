@@ -38,6 +38,9 @@ import kotlin.coroutines.cancellation.CancellationException
  */
 class RecordingForegroundService : Service() {
     companion object {
+        /** Blocks an update install while this call/recording service is alive. No caller data exposed. */
+        @Volatile var isRunning: Boolean = false
+            private set
         // -- Intent action for controlling and initializing the service lifecycle. --
 
         /** Intent action sent to this service to initialize the service and immediately start a new recording session. */
@@ -95,6 +98,7 @@ class RecordingForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        isRunning = true
         notificationHelper = RecordingNotificationHelper(this)
         notificationHelper.createNotificationChannels()
         overlayController = RecordingOverlayController(this)
@@ -286,6 +290,7 @@ class RecordingForegroundService : Service() {
         if (appPreferences.isShizukuAutoManageEnabled() && !appPreferences.isShizukuKeepAliveEnabled()) {
             ShizukuConnectionManager.stopServer(this, appPreferences.getShizukuAuthKey())
         }
+        isRunning = false
         super.onDestroy()
     }
 
