@@ -7,7 +7,7 @@ or share it directly from the list. Includes Hebrew UI and right-to-left layouts
 originally created by kitsumed (Med).** CallReplay uses its own name, icon and package ID:
 `io.github.uriel1010.callreplay`.
 
-[Download a preview](https://github.com/Uriel1010/CallReplay/releases)
+[Download CallReplay](https://github.com/Uriel1010/CallReplay/releases/latest)
 · [Setup guide](docs/SUPPORT.md)
 · [Report an issue](https://github.com/Uriel1010/CallReplay/issues)
 
@@ -20,6 +20,7 @@ originally created by kitsumed (Med).** CallReplay uses its own name, icon and p
 - Finds existing recordings in your chosen folder, including nested folders.
 - Supports Hebrew, RTL layouts, light and dark themes, and adaptive navigation.
 - Retains upstream recording controls, automatic recording rules, audio sources and codecs.
+- Checks GitHub for updates on request, with optional daily checks and verified downloads.
 
 The call log shows **recorded calls**, rather than every entry in the system Phone app.
 Older files without saved caller metadata appear by filename.
@@ -30,7 +31,7 @@ Older files without saved caller metadata appear by filename.
 
 ## Install and set up
 
-1. Download `CallReplay-2.0.0-preview.1-debug.apk` from the
+1. Download the APK ending in `-release.apk` from the
    [releases page](https://github.com/Uriel1010/CallReplay/releases).
 2. Install the APK, allowing installation from your browser or file manager if Android asks.
 3. Open CallReplay and follow the initial setup. To record new calls, start
@@ -39,9 +40,15 @@ Older files without saved caller metadata appear by filename.
 4. For Hebrew, use **Settings → Language → עברית**, or leave the language on system default
    when your phone uses Hebrew.
 
-The current release is a **debug-signed preview**, matching the APK tested on a physical device.
-It is not a production-signed release. App version metadata is `2.0.0` (version code `20`);
-the release tag distinguishes this CallReplay preview from upstream versions.
+Production releases use a dedicated release signing key and are non-debuggable,
+with code and resource shrinking enabled. The public signing lineage supports
+in-place migration from the original CallReplay debug preview. Preserve your
+installed app and its data; do not uninstall to resolve a signing error.
+
+For future updates, open **Settings → About → Check for updates**. Automatic
+checking is optional and initially off. Alternatively, add this repository in
+[Obtainium](https://github.com/ImranR98/Obtainium). Both methods use the same
+GitHub release APK. See [updates, privacy and signing](docs/updates.md).
 
 Android 11+ is the installation minimum. Recording support depends on Android version, device
 manufacturer, audio source and Shizuku. See the [setup and compatibility guide](docs/SUPPORT.md).
@@ -49,7 +56,7 @@ VoIP and Wi-Fi calling support is best effort. Test recording on your own device
 
 ## Hebrew and accessibility
 
-All 225 translatable strings include Hebrew text: call logs, settings, setup, notifications and
+Hebrew text covers call logs, settings, setup, notifications, updates and
 accessibility labels. Phone numbers and playback times keep their left-to-right ordering.
 Date headings follow the app language. Brand names, technical identifiers and the original
 nontranslatable legal disclaimer remain in their source language.
@@ -81,9 +88,10 @@ adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb shell am instrument -w io.github.uriel1010.callreplay.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
-The preview passed **17 instrumentation tests** on a physical CPH2747: default launch behavior,
+The reference UI passed **33 instrumentation tests** on a physical CPH2747: default launch behavior,
 playback lifecycle, seeking, metadata persistence, search, filters, share intents, Hebrew text,
-RTL phone numbers, and landscape with large text. Lint completed with zero errors and 117 warnings.
+RTL phone numbers, and landscape with large text. That build's lint completed with zero errors and 127 warnings.
+Each release's notes identify its own verification and any device-testing limitations.
 These checks use synthetic contacts and audio; they do not establish call-capture compatibility
 across devices. See [implementation and verification notes](docs/recording-history.md).
 

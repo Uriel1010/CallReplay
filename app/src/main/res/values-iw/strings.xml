@@ -225,5 +225,5 @@
     <string name="history_seek">מיקום בהקלטה</string>
     <string name="history_share">שיתוף ההקלטה של %1$s</string>
     <string name="history_share_failed">לא ניתן לשתף את ההקלטה. יש לוודא שהקובץ עדיין זמין ולנסות שוב.</string>
-    <string name="history_fork_attribution">מבוסס על ShizuCallRecorder · הפרויקט המקורי</string>
+    <string name="history_fork_attribution">גרסה עצמאית ששונתה מתוך ShizuCallRecorder · לפרויקט המקורי</string>
 </resources>

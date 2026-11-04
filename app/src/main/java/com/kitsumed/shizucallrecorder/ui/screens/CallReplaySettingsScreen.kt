@@ -30,6 +30,7 @@ import com.kitsumed.shizucallrecorder.system.*
 import com.kitsumed.shizucallrecorder.ui.viewmodels.*
 import com.kitsumed.shizucallrecorder.utils.RecordingFileNameFormatter
 import org.json.JSONObject
+import com.kitsumed.shizucallrecorder.updates.UpdateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,11 +44,16 @@ internal fun CallReplaySettingsScreen(settings: SettingsViewModel, onSetupRecord
     val contacts by picker.contactPickerState.collectAsState()
     val context = LocalContext.current
     val preferences = settings.preferences
+    val updater: UpdateViewModel = viewModel()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { nav.refresh() }
     LaunchedEffect(route) { onDetailChanged(route != "index") }
     BackHandler(route != "index") {
         if(contacts != null) picker.dismissContactPicker()
-        else route = if(route == "permissions" || route == "audio") "setup" else "index"
+        else route = when(route) {
+            "permissions", "audio" -> "setup"
+            "updates" -> "about"
+            else -> "index"
+        }
     }
     val folderPicker = rememberLauncherForActivityResult(PersistentFolderPickerContract()) { uri ->
         if(uri != null) { context.takePersistableFolderPermission(uri); preferences.setRecordingFolderUri(uri); settings.refresh(); nav.refresh() }
@@ -95,11 +101,13 @@ internal fun CallReplaySettingsScreen(settings: SettingsViewModel, onSetupRecord
             Column(Modifier.padding(padding).padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 WaveMark(72.dp, true); Text("CallReplay", style = MaterialTheme.typography.headlineMedium)
                 Text(settings.getAppVersion()); Text(stringResource(R.string.history_fork_attribution))
+                Button(onClick = { route = "updates" }) { Text(stringResource(R.string.updates_check)) }
                 val uri = LocalUriHandler.current
                 TextButton(onClick = { uri.openUri("https://github.com/kitsumed/ShizuCallRecorder") }) { Text(stringResource(R.string.replay_donate)) }
                 TextButton(onClick = { uri.openUri("https://github.com/Uriel1010/CallReplay") }) { Text(stringResource(R.string.replay_github)) }
             }
         }
+        "updates" -> UpdateScreen(updater, onBack = { route = "about" })
         "advanced" -> ReplayPage(stringResource(R.string.replay_advanced), back) { padding -> Box(Modifier.padding(padding)) { SettingsScreen(settings) } }
     }
 }

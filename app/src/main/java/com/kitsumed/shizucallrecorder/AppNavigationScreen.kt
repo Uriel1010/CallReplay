@@ -27,6 +27,8 @@ import com.kitsumed.shizucallrecorder.ui.screens.DisclaimerScreen
 import com.kitsumed.shizucallrecorder.ui.screens.PermissionsScreen
 import com.kitsumed.shizucallrecorder.ui.screens.RecorderHomeScreen
 import com.kitsumed.shizucallrecorder.ui.theme.ShizuCallRecorderTheme
+import com.kitsumed.shizucallrecorder.ui.screens.UpdateHost
+import com.kitsumed.shizucallrecorder.updates.UpdateViewModel
 import com.kitsumed.shizucallrecorder.ui.viewmodels.AppNavigationViewModel
 import com.kitsumed.shizucallrecorder.ui.viewmodels.SettingsViewModel
 
@@ -39,6 +41,7 @@ import com.kitsumed.shizucallrecorder.ui.viewmodels.SettingsViewModel
 fun AppNavigationScreen(launchGeneration: Int = 0) {
     val navigation: AppNavigationViewModel = viewModel()
     val settings: SettingsViewModel = viewModel()
+    val updater: UpdateViewModel = viewModel()
     val status by navigation.onboardingStatus.collectAsStateWithLifecycle()
     val settingsUpdate by settings.updateTrigger.collectAsStateWithLifecycle()
     val preferences = settings.preferences
@@ -59,6 +62,7 @@ fun AppNavigationScreen(launchGeneration: Int = 0) {
         AppPreferences.ThemeMode.SYSTEM -> isSystemInDarkTheme()
     }
     ShizuCallRecorderTheme(darkTheme = darkTheme, dynamicColor = preferences.isDynamicColorEnabled()) {
+        UpdateHost(updater, enabled = status.disclaimerAccepted)
         when {
             !splashComplete -> CallReplaySplashScreen()
             !status.disclaimerAccepted -> DisclaimerScreen(onContinue = {
