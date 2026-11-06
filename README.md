@@ -16,7 +16,8 @@ originally created by kitsumed (Med).** CallReplay uses its own name, icon and p
 - Opens directly to **Call logs**, with caller details and recordings grouped by date.
 - Searches by contact name, phone number or filename; filters incoming and outgoing calls.
 - Plays, pauses and seeks within recordings without leaving the call log.
-- Shares recordings through the Android Sharesheet.
+- Shares compatible AAC-LC `.m4a` attachments through the Android Sharesheet,
+  including recordings originally saved as Opus or AMR. Original recordings stay unchanged.
 - Finds existing recordings in your chosen folder, including nested folders.
 - Supports Hebrew, RTL layouts, light and dark themes, and adaptive navigation.
 - Retains upstream recording controls, automatic recording rules, audio sources and codecs.
@@ -24,6 +25,10 @@ originally created by kitsumed (Med).** CallReplay uses its own name, icon and p
 
 The call log shows **recorded calls**, rather than every entry in the system Phone app.
 Older files without saved caller metadata appear by filename.
+
+Sharing prepares a separate audio file locally before opening the Sharesheet. You can cancel
+preparation. Completed attachments remain available for delayed imports; attachments older than
+seven days are removed the next time you share. These copies are excluded from Android backups.
 
 <img src="docs/screenshots/hebrew.png" alt="CallReplay Hebrew call log with a fictional contact, search, play and share controls" width="280">
 

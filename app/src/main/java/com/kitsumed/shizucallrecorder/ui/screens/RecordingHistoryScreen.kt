@@ -37,9 +37,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitsumed.shizucallrecorder.R
 import com.kitsumed.shizucallrecorder.data.call.CallDirection
 import com.kitsumed.shizucallrecorder.data.recording.RecordingHistoryEntry
-import com.kitsumed.shizucallrecorder.system.recordingShareIntent
+import com.kitsumed.shizucallrecorder.system.prepareRecordingShare
 import com.kitsumed.shizucallrecorder.ui.viewmodels.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.*
@@ -96,6 +100,9 @@ private fun RecordingHistoryScreen(onOpenSettings: () -> Unit, onSetupRecording:
     val snackbar = remember { SnackbarHostState() }
     val shareTitle = stringResource(R.string.general_share)
     val shareError = stringResource(R.string.history_share_failed)
+    val sharePreparing = stringResource(R.string.share_preparing)
+    val cancelShare = stringResource(R.string.general_cancel)
+    var shareJob by remember { mutableStateOf<Job?>(null) }
     val deleteError = stringResource(R.string.delete_recording_confirmation_failed)
     var selectedUri by rememberSaveable { mutableStateOf<String?>(null) }
     var actionsEntry by remember { mutableStateOf<RecordingHistoryEntry?>(null) }
@@ -108,9 +115,20 @@ private fun RecordingHistoryScreen(onOpenSettings: () -> Unit, onSetupRecording:
     LaunchedEffect(selected) { onPlayerChanged(selected != null) }
     BackHandler(selected != null) { selectedUri = null }
     val share: (RecordingHistoryEntry) -> Unit = { entry ->
-        runCatching { context.startActivity(Intent.createChooser(recordingShareIntent(entry.uri,
-            context.contentResolver.getType(entry.uri), entry.fileName), shareTitle))
-        }.onFailure { scope.launch { snackbar.showSnackbar(shareError) } }
+        if(shareJob?.isActive != true) shareJob = scope.launch { supervisorScope {
+            val preparation = async { prepareRecordingShare(context, entry.uri, entry.fileName) }
+            val notice = launch {
+                if(snackbar.showSnackbar(sharePreparing, cancelShare, duration = SnackbarDuration.Indefinite) == SnackbarResult.ActionPerformed)
+                    preparation.cancel()
+            }
+            var failed = false
+            try {
+                context.startActivity(Intent.createChooser(preparation.await(), shareTitle))
+            } catch(cancelled: CancellationException) { throw cancelled }
+            catch(_: Exception) { failed = true }
+            finally { notice.cancel(); snackbar.currentSnackbarData?.dismiss() }
+            if(failed) snackbar.showSnackbar(shareError)
+        } }
     }
     if(selected != null) RecordingPlayerContent(selected, playback, { selectedUri = null },
         { viewModel.toggle(selected) }, viewModel::seek, viewModel::setSpeed, viewModel::toggleMute,
