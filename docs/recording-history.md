@@ -11,8 +11,9 @@ The original license and attribution remain in place. This feature was implement
 2. Open Call logs to browse recordings, newest first, grouped by day. This is the default destination.
 3. Search by caller name, phone number, or filename. Filter incoming or outgoing recordings.
 4. Tap play to listen in the app. Pause or seek using the controls beneath the selected call.
-   Use the share button beside a recording to open Android's share menu with the audio attached.
-   The chosen recipient receives temporary read access to that recording.
+   Use the share button beside a recording to prepare an AAC-LC `.m4a` attachment locally,
+   then open Android's share menu. Preparation can be cancelled. The chosen recipient receives
+   read-only access to the completed copy; the original recording remains unchanged.
 5. Refresh after adding or deleting files outside the app. The list also refreshes on resume.
 
 After the one-time disclaimer, call logs open even when recording prerequisites are missing.
@@ -41,6 +42,13 @@ No playback library or runtime dependency was added.
 ## Storage and migration
 
 Audio stays in the chosen folder. No files are renamed or moved. Empty files are excluded.
+Sharing creates a separate MP4/AAC attachment in private app storage. Its FileProvider reports
+`audio/mp4` consistently, even when a device's extension map misidentifies `.m4a`. Compatible
+AAC-LC packets are copied without re-encoding; other supported audio is decoded and encoded
+as AAC-LC, retaining the decoded sample rate and mono/stereo layout. Completed exports remain
+available for delayed imports. Copies older than seven days are removed on the next share;
+they are excluded from Android cloud backup and device transfer. Conversion uses Android's
+local codecs and sends no recordings over the network. Failed/cancelled exports are removed.
 Deleting a file outside the app removes it from Recents after refresh. Switching folders lists the
 new folder; selecting the old folder again restores that folder's recorded caller information.
 Metadata remains private to this installation, is not written into audio files, and is lost if app

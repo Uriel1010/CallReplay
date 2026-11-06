@@ -13,11 +13,15 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
+        <exclude domain="file" path="shared_recordings/" />
         <!-- TODO: Use <include> and <exclude> to control what is backed up.
         <include .../>
         <exclude .../>
         -->
     </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="shared_recordings/" />
+    </device-transfer>
     <!--
     <device-transfer>
         <include .../>
